@@ -1,0 +1,51 @@
+# Error-handling cases against a local server (uvicorn app.main:app --port 4000)
+
+$ curl -X POST localhost:4000/link-analysis -d '{"url":"http://127.0.0.1:8000/admin"}'
+{"success":false,"website":"http://127.0.0.1:8000/admin","error":{"code":"blocked_url","message":"Only default web ports (80/443) are allowed."}}
+HTTP 400
+
+$ curl -X POST localhost:4000/link-analysis -d '{"url":"http://169.254.169.254/latest/meta-data"}'
+{"success":false,"website":"http://169.254.169.254/latest/meta-data","error":{"code":"blocked_url","message":"Access to private or internal IP addresses is not allowed."}}
+HTTP 400
+
+$ curl -X POST localhost:4000/link-analysis -d '{"url":"http://localhost/"}'
+{"success":false,"website":"http://localhost/","error":{"code":"blocked_url","message":"Access to local or internal hostnames is not allowed."}}
+HTTP 400
+
+$ curl -X POST localhost:4000/link-analysis -d '{"url":"ftp://example.com"}'
+{"success":false,"website":"ftp://example.com","error":{"code":"invalid_url","message":"Only http and https URLs are supported."}}
+HTTP 400
+
+$ curl -X POST localhost:4000/link-analysis -d '{"url":"not a url"}'
+{"success":false,"website":"not a url","error":{"code":"invalid_url","message":"URL must not contain whitespace."}}
+HTTP 400
+
+$ curl -X POST localhost:4000/link-analysis -d '{"url":"https://thisdomaindoesnotexist-xyz123.com"}'
+{"success":false,"website":"https://thisdomaindoesnotexist-xyz123.com","error":{"code":"invalid_url","message":"Domain 'thisdomaindoesnotexist-xyz123.com' could not be resolved."}}
+HTTP 400
+
+$ curl -X POST localhost:4000/link-analysis -d '{}'
+{"success":false,"website":null,"error":{"code":"invalid_request","message":"body.url: Field required"}}
+HTTP 422
+
+# Server log
+INFO:     Started server process [37560]
+INFO:     Waiting for application startup.
+2026-11-18 22:37:19,201 WARNING link-analysis: OPENAI_API_KEY is not set - /link-analysis will return llm_not_configured
+2026-11-18 22:37:19,201 INFO link-analysis: Primary model: gpt-6-luna | fallback: gpt-5.4-mini
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:4000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:65522 - "GET /health HTTP/1.1" 200 OK
+2026-11-18 22:37:19,640 WARNING link-analysis: blocked_url: Only default web ports (80/443) are allowed.
+INFO:     127.0.0.1:49165 - "POST /link-analysis HTTP/1.1" 400 Bad Request
+2026-11-18 22:37:19,905 WARNING link-analysis: blocked_url: Access to private or internal IP addresses is not allowed.
+INFO:     127.0.0.1:49167 - "POST /link-analysis HTTP/1.1" 400 Bad Request
+2026-11-18 22:37:20,172 WARNING link-analysis: blocked_url: Access to local or internal hostnames is not allowed.
+INFO:     127.0.0.1:49169 - "POST /link-analysis HTTP/1.1" 400 Bad Request
+2026-11-18 22:37:20,446 WARNING link-analysis: invalid_url: Only http and https URLs are supported.
+INFO:     127.0.0.1:49171 - "POST /link-analysis HTTP/1.1" 400 Bad Request
+2026-11-18 22:37:20,716 WARNING link-analysis: invalid_url: URL must not contain whitespace.
+INFO:     127.0.0.1:49175 - "POST /link-analysis HTTP/1.1" 400 Bad Request
+2026-11-18 22:37:21,020 WARNING link-analysis: invalid_url: Domain 'thisdomaindoesnotexist-xyz123.com' could not be resolved.
+INFO:     127.0.0.1:49177 - "POST /link-analysis HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:49179 - "POST /link-analysis HTTP/1.1" 422 Unprocessable Content
