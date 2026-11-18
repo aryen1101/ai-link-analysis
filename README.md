@@ -247,9 +247,13 @@ Typical request = system prompt (~600 tokens) + JSON schema (~2,000 tokens) + cl
 
 ## Deployment
 
-The repo includes `render.yaml` and a `Procfile`.
+The repo includes a `Procfile` for platforms that use one (Railway, Heroku, etc.).
 
-**Render (free):** New → Blueprint → select this repo → set `OPENAI_API_KEY` → deploy. Start command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`.
+**Render (free):** New → Web Service → select this repo, then set:
+
+* Build command: `pip install -r requirements.txt`
+* Start command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+* Environment variable: `OPENAI_API_KEY`
 
 | | URL |
 |---|---|
