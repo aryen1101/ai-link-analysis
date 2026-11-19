@@ -129,6 +129,10 @@ class TargetAudience(BaseModel):
 
 class LLMAnalysis(BaseModel):
     brand: Brand
+    analysis_confidence: Literal["high", "medium", "low"] = Field(
+        description="high = content clearly describes the business; medium = partly; low = thin evidence"
+    )
+    confidence_reason: str = Field(description="One sentence: what evidence the analysis is based on")
     competitor_analysis: CompetitorAnalysis
     target_search_queries: list[SearchQuery]
     seo_improvements: SEOImprovements
@@ -154,9 +158,22 @@ class TokenUsage(BaseModel):
     estimated_cost_usd: float | None = None
 
 
+class WebSource(BaseModel):
+    title: str
+    url: str
+
+
 class AnalysisMeta(BaseModel):
     provider: str
     model: str
+    source_type: Literal["website", "social_profile"]
+    platform: str | None = None
+    handle: str | None = None
+    content_quality: Literal["good", "limited", "insufficient"]
+    data_sources: list[str] = Field(description="'website_content' and/or 'web_search'")
+    analysis_confidence: Literal["high", "medium", "low"]
+    confidence_reason: str
+    web_research_sources: list[WebSource] = []
     pages_analyzed: list[str]
     content_chars_sent: int
     cached: bool
@@ -182,3 +199,4 @@ class ErrorResponse(BaseModel):
     success: Literal[False] = False
     website: str | None = None
     error: ErrorDetail
+    details: dict | None = None

@@ -355,4 +355,35 @@ def build_llm_context(content: WebsiteContent, max_chars: int) -> str:
     return (header + body)[:max_chars]
 
 
-__all__ = ["WebsiteExtractor", "WebsiteContent", "PageContent", "build_llm_context", "AppError"]
+_URL_ONLY = re.compile(r"^(\s*https?://\S+\s*)+$", re.I)
+_BOILERPLATE = re.compile(
+    r"(log ?in|sign ?up|create (an )?account|forgot (your )?password|cookie|javascript is (not available|disabled)|"
+    r"enable javascript|see instagram photos|terms of (use|service)|privacy policy|all rights reserved|"
+    r"posts replies|something went wrong)",
+    re.I,
+)
+
+
+def evidence_chars(content: "WebsiteContent | None") -> int:
+    """Characters of real, page-specific information (descriptions, structured data, body text).
+
+    Generic platform chrome - login walls, cookie banners, bare URLs, nav labels - is excluded,
+    so an Instagram login page scores ~0 even though its HTML is half a megabyte.
+    """
+    if content is None:
+        return 0
+    seen: set[str] = set()
+    total = 0
+    for page in [content.homepage, *content.subpages]:
+        candidates = [page.meta_description, page.og.get("og:description", ""), *page.structured_data]
+        candidates += [b for b in page.text_blocks if len(b) >= 20]
+        for text in candidates:
+            key = text.strip().lower()
+            if not key or key in seen or _URL_ONLY.match(text) or _BOILERPLATE.search(text):
+                continue
+            seen.add(key)
+            total += len(text)
+    return total
+
+
+__all__ = ["WebsiteExtractor", "WebsiteContent", "PageContent", "build_llm_context", "evidence_chars", "AppError"]

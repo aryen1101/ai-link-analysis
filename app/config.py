@@ -32,6 +32,23 @@ class Settings(BaseSettings):
     groq_max_content_chars: int = 5_000
     groq_reasoning_effort: str = "low"
 
+    # --- Web research (Gemini + Google Search grounding) ---
+    # Used when the page itself has too little evidence: social profiles behind a login wall,
+    # sites that block automated requests, empty JavaScript shells.
+    web_research_enabled: bool = True
+    # Tried in order; providers without an API key are skipped.
+    #   groq   = gpt-oss + built-in browser_search tool (free tier ~1K requests/day)
+    #   gemini = Google Search grounding (free tier only ~20 requests/day per model)
+    research_providers: str = "groq,gemini"
+    research_groq_model: str = "openai/gpt-oss-120b"
+    research_gemini_model: str = "gemini-2.5-flash-lite"
+    research_timeout_seconds: float = 30.0
+    # Fetch and analyse the brand's official website when research names one.
+    follow_official_website: bool = True
+    # Evidence thresholds (characters of page-specific text, see website_extractor.evidence_chars)
+    min_evidence_chars: int = 300     # below: no analysis without reliable web research
+    good_evidence_chars: int = 2000   # below: page content is supplemented with web research
+
     # --- Website extraction ---
     fetch_timeout_seconds: float = 15.0
     max_response_bytes: int = 3_000_000

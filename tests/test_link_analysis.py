@@ -42,6 +42,8 @@ SAMPLE_HTML = """
 def fake_analysis() -> LLMAnalysis:
     return LLMAnalysis.model_validate({
         "brand": {"name": "Acme", "category": "Accounting Software", "summary": "Cloud bookkeeping for SMBs."},
+        "analysis_confidence": "high",
+        "confidence_reason": "Website clearly describes invoicing and payroll products.",
         "competitor_analysis": {
             "brand_overview": "Acme offers invoicing and payroll.",
             "main_category": "Accounting Software",
@@ -216,7 +218,7 @@ class FakeProvider(LLMProvider):
         self.prompts.append(user)
         if self.error:
             raise self.error
-        assert "<website_content>" in user and "payroll" in user
+        assert "payroll" in user or "<web_research" in user
         return fake_analysis(), 4000, 2500, self.model
 
 
@@ -225,13 +227,25 @@ def FakeLLM(fail=False):
     return LLMService(Settings(), providers=[FakeProvider("gemini", "gemini-2.5-flash-lite", err)])
 
 
-def make_client(llm=None, extractor=None):
+class FakeResearch:
+    """Stands in for Gemini Google Search grounding. ``result=None`` means research unavailable."""
+
+    def __init__(self, result=None):
+        self.result, self.calls = result, []
+
+    async def lookup(self, url, platform, title="", desc=""):
+        self.calls.append((url, platform))
+        return self.result
+
+
+def make_client(llm=None, extractor=None, research=None):
     from app.main import app
 
     client = TestClient(app)
     client.__enter__()
     app.state.analysis = AnalysisService(
-        Settings(), extractor=extractor or FakeExtractor(), llm=llm or FakeLLM()
+        Settings(), extractor=extractor or FakeExtractor(), llm=llm or FakeLLM(),
+        research=research or FakeResearch(),
     )
     return client
 

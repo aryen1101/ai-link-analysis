@@ -43,15 +43,17 @@ app = FastAPI(
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["GET", "POST"], allow_headers=["*"])
 
 
-def _error(status: int, code: str, message: str, website: str | None = None) -> JSONResponse:
-    body = ErrorResponse(website=website, error={"code": code, "message": message})
-    return JSONResponse(status_code=status, content=body.model_dump())
+def _error(
+    status: int, code: str, message: str, website: str | None = None, details: dict | None = None
+) -> JSONResponse:
+    body = ErrorResponse(website=website, error={"code": code, "message": message}, details=details)
+    return JSONResponse(status_code=status, content=body.model_dump(exclude_none=True))
 
 
 @app.exception_handler(AppError)
 async def app_error_handler(request: Request, exc: AppError):
     logger.warning("%s: %s", exc.code, exc.message)
-    return _error(exc.status_code, exc.code, exc.message, getattr(request.state, "website", None))
+    return _error(exc.status_code, exc.code, exc.message, getattr(request.state, "website", None), exc.details)
 
 
 @app.exception_handler(RequestValidationError)
