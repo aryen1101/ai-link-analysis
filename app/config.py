@@ -11,11 +11,14 @@ class Settings(BaseSettings):
     # --- LLM providers (tried in this order; only providers with a key are used) ---
     llm_primary_provider: str = "gemini"
     llm_fallback_provider: str = "groq"
-    llm_timeout_seconds: float = 90.0
+    # Hard per-provider deadline; after it the next provider is tried.
+    llm_timeout_seconds: float = 60.0
 
     # Google Gemini - https://aistudio.google.com/apikey (free tier available)
     gemini_api_key: str = ""
-    gemini_model: str = "gemini-3.5-flash-lite"
+    gemini_model: str = "gemini-2.5-flash-lite"
+    # v1beta supports system instructions + response schemas for every current model.
+    gemini_api_version: str = "v1beta"
     gemini_max_output_tokens: int = 8192
     gemini_max_content_chars: int = 14_000
     # Optional thinking budget in tokens (0 disables thinking where supported). None = model default.
@@ -25,8 +28,8 @@ class Settings(BaseSettings):
     groq_api_key: str = ""
     groq_model: str = "openai/gpt-oss-120b"
     # Free tier allows ~8K tokens/minute (prompt + output), so Groq gets a smaller budget.
-    groq_max_output_tokens: int = 3500
-    groq_max_content_chars: int = 6_000
+    groq_max_output_tokens: int = 4400
+    groq_max_content_chars: int = 5_000
     groq_reasoning_effort: str = "low"
 
     # --- Website extraction ---

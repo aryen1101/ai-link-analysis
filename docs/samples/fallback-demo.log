@@ -1,0 +1,50 @@
+# Fallback demo: GEMINI_MODEL set to a non-existent model, so Gemini fails and Groq answers.
+$ GEMINI_MODEL=gemini-model-that-does-not-exist uvicorn app.main:app --port 4000
+$ curl -X POST localhost:4000/link-analysis -d '{"url":"https://dxora.com"}'
+{
+  "success": true,
+  "brand": {
+    "name": "Dxora Technologies",
+    "category": "Software Engineering & Digital Transformation Agency",
+    "summary": "Dxora Technologies is a premier software engineering firm that provides custom software development, enterprise AI/LLM engineering, mobile and web apps, data engineering, generative AI, and cloud architecture services. With over 16 years of experience, it serves clients in India, the US, UK, UAE, and New Zealand."
+  },
+  "meta": {
+    "provider": "groq",
+    "model": "openai/gpt-oss-120b",
+    "processing_time_ms": 21167,
+    "token_usage": {
+      "input_tokens": 2712,
+      "output_tokens": 3470,
+      "total_tokens": 6182,
+      "estimated_cost_usd": 0.002489
+    },
+    "cached": false
+  }
+}
+
+# Same URL again (served from cache, no LLM call)
+{"success": true, "cached": true, "provider": "groq"}
+
+# Server log
+INFO:     Started server process [3180]
+INFO:     Waiting for application startup.
+2026-11-19 21:28:11,751 INFO link-analysis: LLM provider chain: gemini:gemini-model-that-does-not-exist -> groq:openai/gpt-oss-120b
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:4000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:59698 - "GET /health HTTP/1.1" 200 OK
+2026-11-19 21:28:12,431 INFO httpx: HTTP Request: GET https://dxora.com/ "HTTP/1.1 200 OK"
+2026-11-19 21:28:12,471 INFO httpx: HTTP Request: GET https://dxora.com/services/generative-ai "HTTP/1.1 200 OK"
+2026-11-19 21:28:12,560 INFO httpx: HTTP Request: GET https://dxora.com/services/llm-development "HTTP/1.1 200 OK"
+2026-11-19 21:28:12,627 INFO httpx: HTTP Request: GET https://dxora.com/services/consulting "HTTP/1.1 200 OK"
+2026-11-19 21:28:12,639 INFO app.services.analysis_service: Extracted 2033 chars from 4 page(s) for https://dxora.com/
+2026-11-19 21:28:13,615 INFO httpx2: HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-model-that-does-not-exist:generateContent "HTTP/1.1 404 Not Found"
+2026-11-19 21:28:13,616 WARNING app.services.llm_service: LLM provider gemini (gemini-model-that-does-not-exist) failed: Gemini model 'gemini-model-that-does-not-exist' is not available.
+2026-11-19 21:28:21,485 INFO httpx: HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 400 Bad Request"
+2026-11-19 21:28:21,488 INFO app.services.llm_service: Groq output failed schema validation; retrying once
+2026-11-19 21:28:21,552 INFO httpx: HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-11-19 21:28:21,552 INFO groq._base_client: Retrying request to /openai/v1/chat/completions in 4.000000 seconds
+2026-11-19 21:28:33,226 INFO httpx: HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-11-19 21:28:33,231 INFO app.services.llm_service: LLM groq/openai/gpt-oss-120b: 2712 in / 3470 out tokens, 19615 ms, ~$0.002489 at paid list price
+INFO:     127.0.0.1:59704 - "POST /link-analysis HTTP/1.1" 200 OK
+2026-11-19 21:28:33,580 INFO app.services.analysis_service: Cache hit for https://dxora.com/
+INFO:     127.0.0.1:56542 - "POST /link-analysis HTTP/1.1" 200 OK

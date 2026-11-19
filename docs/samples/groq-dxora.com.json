@@ -1,0 +1,419 @@
+{
+  "success": true,
+  "website": "https://dxora.com/",
+  "brand": {
+    "name": "Dxora Technologies",
+    "category": "Software Engineering & Digital Transformation",
+    "summary": "Dxora Technologies is a software engineering and digital transformation agency that offers custom software development, enterprise AI/LLM engineering, mobile and web app development, data engineering, generative AI, and cloud architecture services. With over 16 years of experience, it serves clients in India, the US, the UK, the UAE, and New Zealand."
+  },
+  "analysis": {
+    "competitor_analysis": {
+      "brand_overview": "Dxora positions itself as a full-stack, enterprise-grade partner for AI-enabled digital transformation, targeting midsize to large organizations that need custom software, AI/LLM solutions, and cloud infrastructure.",
+      "main_category": "Custom Software Development & Enterprise AI Services",
+      "main_products_services": [
+        "Custom Software Development",
+        "Enterprise AI & LLM Engineering",
+        "Mobile & Web App Development",
+        "Data Engineering & Analytics",
+        "Generative AI Solutions",
+        "Cloud Architecture & DevOps"
+      ],
+      "competitors": [
+        {
+          "name": "Cognizant",
+          "website": "https://www.cognizant.com",
+          "target_market": "Enterprises and large mid-market firms worldwide",
+          "main_service": "Global IT consulting, custom software, AI and cloud services",
+          "strengths": [
+            "Large delivery network",
+            "Deep industry expertise",
+            "Strong brand recognition"
+          ],
+          "weaknesses_or_gaps": [
+            "Higher cost for SMBs",
+            "Less boutique, personalized approach"
+          ],
+          "source": "ai_suggestion"
+        },
+        {
+          "name": "DataArt",
+          "website": "https://www.dataart.com",
+          "target_market": "Mid-market tech companies and startups in US/Europe",
+          "main_service": "Custom software engineering and AI solutions",
+          "strengths": [
+            "Agile delivery model",
+            "Focus on product-centric development"
+          ],
+          "weaknesses_or_gaps": [
+            "Limited presence in APAC",
+            "Smaller AI research team"
+          ],
+          "source": "ai_suggestion"
+        },
+        {
+          "name": "Infosys",
+          "website": "https://www.infosys.com",
+          "target_market": "Large enterprises across North America, Europe, and Asia",
+          "main_service": "End-to-end digital transformation, AI, cloud and automation",
+          "strengths": [
+            "Scale and global delivery centers",
+            "Extensive AI research labs"
+          ],
+          "weaknesses_or_gaps": [
+            "Perceived as high-cost and bureaucratic",
+            "Less focus on niche product platforms"
+          ],
+          "source": "ai_suggestion"
+        },
+        {
+          "name": "ThoughtWorks",
+          "website": "https://www.thoughtworks.com",
+          "target_market": "Innovative midsize enterprises and tech-forward startups",
+          "main_service": "Custom software, digital transformation, and AI consulting",
+          "strengths": [
+            "Strong engineering culture",
+            "Thought leadership in agile & DevOps"
+          ],
+          "weaknesses_or_gaps": [
+            "Premium pricing",
+            "Limited cloud-infrastructure execution at scale"
+          ],
+          "source": "ai_suggestion"
+        },
+        {
+          "name": "Tata Consultancy Services (TCS)",
+          "website": "https://www.tcs.com",
+          "target_market": "Global enterprises and government agencies",
+          "main_service": "IT services, enterprise AI, cloud migration, and automation",
+          "strengths": [
+            "Massive resources and global footprint",
+            "Broad portfolio across industries"
+          ],
+          "weaknesses_or_gaps": [
+            "Less agile for rapid product launches",
+            "Potentially slower decision cycles"
+          ],
+          "source": "ai_suggestion"
+        }
+      ],
+      "comparison_table": [
+        {
+          "aspect": "Main Service",
+          "your_brand": "Custom software, enterprise AI/LLM, cloud & mobile app development",
+          "competitors": [
+            "Global IT consulting & AI services",
+            "Custom software engineering & AI solutions",
+            "End-to-end digital transformation & AI",
+            "Custom software & digital transformation consulting",
+            "IT services, enterprise AI & cloud migration"
+          ]
+        },
+        {
+          "aspect": "Target Market",
+          "your_brand": "Mid-size to large enterprises in IN, US, GB, AE, NZ seeking AI-enabled transformation",
+          "competitors": [
+            "Enterprises and large mid-market firms worldwide",
+            "Mid-market tech companies & startups US/Europe",
+            "Large enterprises North America, Europe, Asia",
+            "Innovative midsize enterprises & tech-forward startups",
+            "Global enterprises & government agencies"
+          ]
+        },
+        {
+          "aspect": "Key Strength",
+          "your_brand": "16+ years of delivery, boutique agility, multi-regional presence, product portfolio (CBN, ChargeXFinder, etc.)",
+          "competitors": [
+            "Scale, brand, industry depth",
+            "Agile delivery, product focus",
+            "Scale, AI labs",
+            "Engineering culture, thought leadership",
+            "Resources, global footprint"
+          ]
+        },
+        {
+          "aspect": "Weakness/Gap",
+          "your_brand": "Smaller brand recognition vs. top-tier consultancies, limited US sales footprint",
+          "competitors": [
+            "Higher cost for SMBs, less personalized",
+            "Limited APAC presence, smaller AI team",
+            "Perceived high-cost, bureaucratic",
+            "Premium pricing, limited large-scale cloud execution",
+            "Less agile, slower decisions"
+          ]
+        },
+        {
+          "aspect": "Opportunity",
+          "your_brand": "Leverage niche AI product suite, expand US sales, capture fast-moving AI/LLM projects",
+          "competitors": [
+            "Capture boutique-level pricing appeal",
+            "Grow APAC footprint, strengthen AI R&D",
+            "Offer more flexible pricing for mid-market",
+            "Provide rapid-deployment cloud solutions",
+            "Introduce agile delivery models for large clients"
+          ]
+        }
+      ],
+      "competitive_advantages": [
+        "Boutique agility with 16+ years of experience",
+        "Own AI-driven product portfolio (CBN, ChargeXFinder, Dxora Automation)",
+        "Multi-regional service coverage (India, US, UK, UAE, NZ)",
+        "Strong focus on enterprise LLM engineering and generative AI"
+      ],
+      "market_positioning_opportunities": [
+        "Target fast-growing AI/LLM adoption in US mid-market firms",
+        "Promote proprietary AI products as differentiators",
+        "Build strategic partnerships for US go-to-market",
+        "Create industry-specific solutions (e.g., EV charging, B2B marketplace)"
+      ]
+    },
+    "target_search_queries": [
+      {
+        "query": "enterprise AI development services",
+        "platforms": [
+          "Google"
+        ],
+        "intent": "Informational",
+        "business_relevance": "High – matches Dxora’s core AI/LLM offering",
+        "target_audience": "CTOs, Digital Transformation Leaders"
+      },
+      {
+        "query": "custom software development partner for fintech",
+        "platforms": [
+          "LinkedIn"
+        ],
+        "intent": "Commercial",
+        "business_relevance": "High – aligns with Dxora’s custom software focus",
+        "target_audience": "CTOs, Product Managers"
+      },
+      {
+        "query": "generative AI solutions for retail POS",
+        "platforms": [
+          "Google",
+          "X"
+        ],
+        "intent": "Transactional",
+        "business_relevance": "Medium – ties to Dxora’s DSale and AI product suite",
+        "target_audience": "Product Managers, Ops Heads"
+      },
+      {
+        "query": "smart EV charging platform provider",
+        "platforms": [
+          "Facebook",
+          "Instagram"
+        ],
+        "intent": "Informational",
+        "business_relevance": "Medium – relates to ChargeXFinder product",
+        "target_audience": "EV Infrastructure Planners"
+      },
+      {
+        "query": "B2B hyperlocal marketplace development",
+        "platforms": [
+          "LinkedIn",
+          "Google"
+        ],
+        "intent": "Commercial",
+        "business_relevance": "Medium – links to DSuply offering",
+        "target_audience": "Supply Chain Ops Directors"
+      }
+    ],
+    "seo_improvements": {
+      "current_title": "Dxora Technologies – Enterprise AI, Cloud & Digital Transformation",
+      "current_meta_description": "Dxora Technologies delivers custom software, enterprise AI/LLM engineering, mobile apps, and scalable cloud solutions with 16+ years of proven excellence.",
+      "keywords": {
+        "primary_keyword": "Enterprise AI",
+        "secondary_keywords": [
+          "custom software development",
+          "AI LLM engineering",
+          "cloud architecture services",
+          "mobile app development"
+        ],
+        "long_tail_keywords": [
+          "enterprise AI and LLM integration services",
+          "custom cloud-native application development",
+          "generative AI solutions for retail",
+          "smart EV charging platform development",
+          "hyperlocal B2B marketplace software"
+        ],
+        "business_keywords": [
+          "digital transformation agency",
+          "AI consulting",
+          "software engineering firm"
+        ]
+      },
+      "recommended_title": "Enterprise AI & Custom Software Solutions | Dxora Technologies",
+      "title_structure": "Primary Keyword (Enterprise AI) | Core Benefit (Custom Software Solutions) | Brand (Dxora Technologies)",
+      "meta_description": "Accelerate your digital transformation with Dxora's enterprise AI, custom software, mobile apps, and cloud services—16+ years of proven expertise for global businesses.",
+      "issues_found": [
+        "Title length is within range but could better incorporate primary keyword \"Enterprise AI\" at the start.",
+        "Meta description is within character limit but repeats the same phrasing as og:description; could be more compelling with a call-to-action.",
+        "Only one H1 present – good, but ensure H2 hierarchy includes relevant keywords.",
+        "Images have no missing alt tags, but the single image should have descriptive alt text for SEO.",
+        "Canonical tag present – OK.",
+        "Viewport tag present – OK."
+      ],
+      "supporting_content": [
+        {
+          "type": "blog_topic",
+          "title": "How Enterprise LLMs are Redefining Business Automation",
+          "reason": "Capture long-tail queries around LLM integration and showcase Dxora’s expertise."
+        },
+        {
+          "type": "industry_page",
+          "title": "AI-Powered Solutions for the Retail & eCommerce Sector",
+          "reason": "Target retail audiences searching for AI-enabled POS and inventory tools."
+        },
+        {
+          "type": "service_landing_page",
+          "title": "Custom Cloud Architecture & DevOps Services",
+          "reason": "Rank for cloud-architecture keywords and highlight Dxora’s DevOps capabilities."
+        },
+        {
+          "type": "faq",
+          "title": "Frequently Asked Questions about Enterprise AI Implementation",
+          "reason": "Address common buyer concerns and improve featured snippet potential."
+        },
+        {
+          "type": "blog_topic",
+          "title": "Building a Smart EV Charging Network: Technology Stack and Best Practices",
+          "reason": "Leverage the ChargeXFinder product to attract EV infrastructure queries."
+        },
+        {
+          "type": "business_article",
+          "title": "Why Mid-Market Companies Need a Dedicated AI Automation Platform",
+          "reason": "Position Dxora Automation as a unique offering for mid-market firms."
+        }
+      ]
+    },
+    "top_services": [
+      {
+        "service_name": "Custom Software Development",
+        "description": "Bespoke software solutions built to meet specific business processes and technology stacks.",
+        "target_industry": "All industries",
+        "target_customer": "Mid-size to large enterprises",
+        "main_benefit": "Accelerates digital initiatives with tailored functionality.",
+        "source": "website_content"
+      },
+      {
+        "service_name": "Enterprise AI & LLM Engineering",
+        "description": "Design, train, and integrate large language models and AI systems into enterprise workflows.",
+        "target_industry": "Financial services, retail, healthcare, energy",
+        "target_customer": "Enterprises seeking AI automation",
+        "main_benefit": "Unlocks intelligent automation and data-driven insights.",
+        "source": "website_content"
+      },
+      {
+        "service_name": "Mobile & Web App Development",
+        "description": "End-to-end development of native mobile, progressive web, and responsive web applications.",
+        "target_industry": "Retail, logistics, B2B marketplaces",
+        "target_customer": "Companies needing consumer-facing or internal apps",
+        "main_benefit": "Delivers engaging, high-performance user experiences.",
+        "source": "website_content"
+      },
+      {
+        "service_name": "Cloud Architecture & DevOps",
+        "description": "Design, migrate, and manage scalable cloud infrastructure with CI/CD and automation.",
+        "target_industry": "All industries",
+        "target_customer": "Organizations modernizing legacy systems",
+        "main_benefit": "Ensures reliable, cost-effective cloud operations.",
+        "source": "website_content"
+      },
+      {
+        "service_name": "Generative AI Solutions",
+        "description": "Custom generative AI models for content creation, code assistance, and data synthesis.",
+        "target_industry": "Marketing, software development, media",
+        "target_customer": "Enterprises looking to automate creative workflows",
+        "main_benefit": "Boosts productivity through AI-generated outputs.",
+        "source": "inferred"
+      }
+    ],
+    "target_audience": {
+      "primary_audience": [
+        "Technology leadership (CTO, VP of Engineering)",
+        "Digital transformation officers"
+      ],
+      "secondary_audience": [
+        "Product managers",
+        "IT operations heads"
+      ],
+      "industries": [
+        "Financial Services",
+        "Retail & eCommerce",
+        "Energy & EV infrastructure",
+        "Healthcare",
+        "Logistics & Supply Chain"
+      ],
+      "business_types": [
+        "Mid-size enterprises (200-1000 employees)",
+        "Large enterprises (1000+ employees)"
+      ],
+      "customer_profiles": [
+        "Companies seeking AI/LLM integration into existing products",
+        "Firms needing custom cloud-native applications",
+        "Organizations wanting end-to-end digital transformation"
+      ],
+      "geographic_focus": "India, United States, United Kingdom, United Arab Emirates, New Zealand (as per areaServed)",
+      "customer_needs_and_challenges": [
+        "Lack of in-house AI expertise",
+        "Complex legacy system modernization",
+        "Need for secure, scalable cloud migration"
+      ],
+      "customer_interests": [
+        "AI-driven automation",
+        "Scalable cloud infrastructure",
+        "Rapid product innovation"
+      ],
+      "recommended_marketing_segments": [
+        {
+          "audience": "CTOs & VP Engineering",
+          "business_type": "Mid-size tech-focused enterprises",
+          "requirement": "Enterprise-grade AI/LLM platforms and cloud architecture"
+        },
+        {
+          "audience": "Digital Transformation Leaders",
+          "business_type": "Large enterprises undergoing modernization",
+          "requirement": "End-to-end custom software and automation solutions"
+        },
+        {
+          "audience": "Product Managers in Retail",
+          "business_type": "Mid-size retail chains",
+          "requirement": "AI-enabled POS, inventory and omnichannel apps"
+        },
+        {
+          "audience": "EV Infrastructure Planners",
+          "business_type": "Energy & transportation firms",
+          "requirement": "Smart charging platforms (ChargeXFinder) and analytics"
+        },
+        {
+          "audience": "Supply Chain Ops Directors",
+          "business_type": "B2B marketplaces",
+          "requirement": "Hyperlocal marketplace (DSuply) and workflow automation"
+        }
+      ]
+    }
+  },
+  "meta": {
+    "provider": "groq",
+    "model": "openai/gpt-oss-120b",
+    "pages_analyzed": [
+      "https://dxora.com/",
+      "https://dxora.com/services/generative-ai",
+      "https://dxora.com/services/consulting",
+      "https://dxora.com/services/llm-development"
+    ],
+    "content_chars_sent": 2033,
+    "cached": false,
+    "processing_time_ms": 8631,
+    "token_usage": {
+      "input_tokens": 2712,
+      "output_tokens": 3471,
+      "total_tokens": 6183,
+      "estimated_cost_usd": 0.002489
+    },
+    "notes": [
+      "Competitors are AI-generated suggestions based on the website content and the model's general market knowledge. They are not verified by live market research.",
+      "Search queries are AI-generated; no search-volume data is reported.",
+      "1 of 5 services are inferred (not explicitly on the website).",
+      "Limited static content was available (the site is likely JavaScript-rendered); the analysis is based on the title, meta tags, headings and visible text only."
+    ]
+  }
+}

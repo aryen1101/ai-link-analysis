@@ -38,10 +38,10 @@ pytest -q
 |---|---|---|
 | `GEMINI_API_KEY` | – | Google Gemini key ([free](https://aistudio.google.com/apikey)). Never committed (`.env` is git-ignored) |
 | `GROQ_API_KEY` | – | Groq key ([free](https://console.groq.com/keys)). At least one of the two keys is required |
-| `GEMINI_MODEL` | `gemini-3.5-flash-lite` | Primary model |
+| `GEMINI_MODEL` | `gemini-2.5-flash-lite` | Primary model |
 | `GROQ_MODEL` | `openai/gpt-oss-120b` | Fallback model (open-weights model hosted on Groq) |
 | `LLM_PRIMARY_PROVIDER` / `LLM_FALLBACK_PROVIDER` | `gemini` / `groq` | Provider order. Providers without a key are skipped |
-| `GEMINI_MAX_CONTENT_CHARS` / `GROQ_MAX_CONTENT_CHARS` | `14000` / `6000` | Website-content budget per provider (Groq free tier allows ~8K tokens/min) |
+| `GEMINI_MAX_CONTENT_CHARS` / `GROQ_MAX_CONTENT_CHARS` | `14000` / `5000` | Website-content budget per provider (Groq free tier allows ~8K tokens/min) |
 | `GROQ_REASONING_EFFORT` | `low` | Reasoning effort for gpt-oss models |
 | `MAX_EXTRA_PAGES` | `3` | Internal pages (about/services/products…) fetched in addition to the homepage |
 | `CACHE_TTL_SECONDS` | `3600` | In-memory result cache per URL |
@@ -100,7 +100,7 @@ curl -X POST http://localhost:4000/link-analysis \
   },
   "meta": {
     "provider": "gemini",
-    "model": "gemini-3.5-flash-lite",
+    "model": "gemini-2.5-flash-lite",
     "pages_analyzed": ["https://stripe.com/in", "https://stripe.com/in/about", "..."],
     "content_chars_sent": 13882,
     "cached": false,
@@ -111,7 +111,7 @@ curl -X POST http://localhost:4000/link-analysis \
 }
 ```
 
-Full real responses are saved in [`docs/samples/`](docs/samples).
+Full real responses from both providers are saved in [`docs/samples/`](docs/samples) (e.g. [`gemini-stripe.com.json`](docs/samples/gemini-stripe.com.json), [`groq-basecamp.com.json`](docs/samples/groq-basecamp.com.json)).
 
 ### Error responses
 
@@ -148,7 +148,7 @@ POST /link-analysis
    ├─ 6. Pick up to 3 high-value internal pages (about / services / products ...) → fetch in parallel
    ├─ 7. Clean: drop scripts/styles/nav/footer, de-duplicate, trim to character budget
    ├─ 8. One LLM call to Gemini with a response schema generated from Pydantic .. services/llm_service.py
-   ├─ 9. Validate with Pydantic; on any failure retry on Groq (strict JSON schema, smaller content budget)
+   ├─ 9. Validate with Pydantic; on error / 60 s timeout / invalid output retry on Groq (strict JSON schema)
    ├─10. Post-process competitors (remove self/duplicates, label as AI suggestion) .. services/competitor_service.py
    └─11. Return JSON + meta (model, pages, tokens, cost, timing, notes)
 ```
@@ -166,7 +166,8 @@ app/
 │   └── competitor_service.py  Competitor clean-up and labelling
 └── utils/
     └── validators.py          URL validation + SSRF protection
-tests/test_link_analysis.py    40 offline tests
+tests/test_link_analysis.py    43 offline tests
+scripts/benchmark.py           Measures latency / tokens / cost per provider on real sites
 ```
 
 ### Design decisions
@@ -188,11 +189,11 @@ All prices are official paid-tier list prices (USD per 1M tokens) **checked on 2
 
 | Provider | Model | Input $/1M | Output $/1M | Context window | Speed (provider-published) | Structured JSON | Free tier | Suitability |
 |---|---|---:|---:|---|---|---|---|---|
-| Google | **`gemini-3.5-flash-lite`** | 0.30 | 2.50 | 1,048,576 | not published | Yes – `response_schema` | Yes | **Recommended primary** |
-| Google | `gemini-3.8-flash` | 0.75 (1.50 from 2027-01-01) | 3.75 (7.50 from 2027-01-01) | 1,048,576 | not published | Yes – `response_schema` | Yes | Stronger Flash model; price doubles in January |
-| Google | `gemini-2.5-flash-lite` | 0.10 | 0.40 | 1,048,576 | not published | Yes – `response_schema` | Yes | Cheapest Gemini, older generation |
-| Groq | **`openai/gpt-oss-120b`** | 0.15 | 0.60 | 131,072 | ~500 tokens/s | Yes – strict `json_schema` | Yes (8K tokens/min) | **Recommended fallback** |
-| Groq | `openai/gpt-oss-20b` | 0.075 | 0.30 | 131,072 | ~1,000 tokens/s | Yes – strict `json_schema` | Yes (8K tokens/min) | Fastest and cheapest; weaker world knowledge for competitors |
+| Google | **`gemini-2.5-flash-lite`** | 0.10 | 0.40 | 1,048,576 | not published | Yes – `response_schema` | Yes | **Recommended primary** – cheapest, reliable in testing |
+| Google | `gemini-3.5-flash-lite` | 0.30 | 2.50 | 1,048,576 | not published | Yes – `response_schema` | Yes | Newer generation; repeatedly overloaded (HTTP 503) in testing |
+| Google | `gemini-3.8-flash` | 0.75 (1.50 from 2027-01-01) | 3.75 (7.50 from 2027-01-01) | 1,048,576 | not published | Yes – `response_schema` | Yes | Stronger Flash model; overloaded in testing; price doubles in January |
+| Groq | **`openai/gpt-oss-120b`** | 0.15 | 0.60 | 131,072 | ~500 tokens/s | Yes – strict `json_schema` | Yes (8K tokens/min) | **Recommended fallback** – fastest in testing |
+| Groq | `openai/gpt-oss-20b` | 0.075 | 0.30 | 131,072 | ~1,000 tokens/s | Yes – strict `json_schema` | Yes (8K tokens/min) | Cheapest overall; smaller model, less world knowledge for competitors |
 | Groq | `qwen/qwen3.8-27b` | 0.80 | 4.00 | 131,072 | ~450 tokens/s | Yes – `json_schema` | Yes | Preview model – not for production |
 
 Sources: [Gemini pricing](https://aistudio.google.com/docs/pricing) · [Gemini models](https://aistudio.google.com/docs/models) · [Gemini structured output](https://aistudio.google.com/docs/structured-output) · [Groq models & pricing](https://console.groq.com/docs/models) · [Groq structured outputs](https://console.groq.com/docs/structured-outputs) · [Groq rate limits](https://console.groq.com/docs/rate-limits)
@@ -203,20 +204,36 @@ Sources: [Gemini pricing](https://aistudio.google.com/docs/pricing) · [Gemini m
 
 ### B. Measured results (this application)
 
+Measured on **2026-11-19** from a home connection in India on the free tiers, with [`scripts/benchmark.py`](scripts/benchmark.py) (`python -m scripts.benchmark <urls>`). Each provider was run on its own (no fallback). Times are end-to-end: website fetch + extraction + LLM call. Full responses: [`docs/samples/`](docs/samples).
+
 | Website | Provider / model | Input tokens | Output tokens | End-to-end time | Cost at paid list price |
 |---|---|---:|---:|---:|---:|
-| _pending – run with API keys, see `docs/samples/`_ | | | | | |
+| dxora.com | gemini / `gemini-2.5-flash-lite` | 967 | 3,731 | 25.8 s | $0.0016 |
+| stripe.com | gemini / `gemini-2.5-flash-lite` | 3,533 | 4,080 | 16.9 s | $0.0020 |
+| basecamp.com | gemini / `gemini-2.5-flash-lite` | 3,607 | 4,100 | 14.5 s | $0.0020 |
+| dxora.com | groq / `openai/gpt-oss-120b` | 2,712 | 3,471 | 8.6 s | $0.0025 |
+| stripe.com | groq / `openai/gpt-oss-120b` | 3,276 | 3,497 | 10.7 s | $0.0026 |
+| basecamp.com | groq / `openai/gpt-oss-120b` | 3,372 | 3,195 | 8.5 s | $0.0024 |
+
+Gemini does not count the response schema as input tokens; Groq does (~2,200 tokens), which is why Groq's input counts are higher for the small dxora.com page.
+
+**Other observations (same day, small sample – not a benchmark):**
+
+* `gemini-3.5-flash-lite` and `gemini-3.8-flash` returned **HTTP 503 "model is currently experiencing high demand"** on most attempts; one successful `gemini-3.5-flash-lite` run took 80 s. `gemini-3.1-flash-lite` timed out after 120 s. `gemini-2.5-flash-lite` succeeded every time.
+* Groq's free tier (8K tokens/minute) fits **one analysis per minute**; back-to-back requests get HTTP 429. Groq also occasionally rejects its own output with `json_validate_failed`; the service retries once automatically.
+* **Output quality** (manual review): both models identified the brand, category and services from the site content, marked inferred services, and suggested plausible competitors (for dxora.com: Ahmedabad-based IT firms Hidden Brains, TatvaSoft and Radixweb; for basecamp.com: Asana, Monday.com, Trello / ClickUp). `gpt-oss-120b` followed the length rules more closely (55-character title vs 65 from Gemini, against a 50–60 target).
+* **Fallback demo:** [`docs/samples/fallback-demo.log`](docs/samples/fallback-demo.log) – Gemini forced to fail, Groq answers, the second request is served from cache.
 
 ### C. Token & cost estimate per analysis
 
-Typical request = system prompt (~600 tokens) + response schema (~2,000 tokens) + cleaned website content (≤14,000 chars ≈ 3,500 tokens) → **≈ 4,000–6,500 input tokens**. The five-section output is **≈ 2,500–4,500 output tokens**.
+Measured: **~1,000–3,600 input tokens** and **~3,200–4,100 output tokens** per website. For a conservative estimate use 5k in / 4k out:
 
 | Model | Estimated cost per analysis (5k in / 4k out) at paid list price |
 |---|---:|
 | `openai/gpt-oss-20b` (Groq) | ≈ $0.0016 |
-| `gemini-2.5-flash-lite` | ≈ $0.0021 |
+| **`gemini-2.5-flash-lite`** | **≈ $0.0021** |
 | `openai/gpt-oss-120b` (Groq) | ≈ $0.0032 |
-| **`gemini-3.5-flash-lite`** | **≈ $0.0115** |
+| `gemini-3.5-flash-lite` | ≈ $0.0115 |
 | `gemini-3.8-flash` | ≈ $0.0188 |
 | `qwen/qwen3.8-27b` (Groq) | ≈ $0.0200 |
 
@@ -226,25 +243,25 @@ On the free tiers the cost is **$0**. The API still reports `meta.token_usage.es
 
 | Item | Value |
 |---|---|
-| Recommended provider | **Google Gemini** |
-| Recommended model | **`gemini-3.5-flash-lite`** |
-| Estimated input tokens | ~4,000–6,500 per website |
-| Estimated output tokens | ~2,500–4,500 per website |
-| Estimated cost per analysis | **$0 on the free tier**; ~$0.01 on the paid tier (≈ 90 analyses per $1) |
-| Expected response time | Estimate: 10–30 s end-to-end (extraction 1–3 s + generation); see measured table |
-| Fallback | **Groq `openai/gpt-oss-120b`** – automatic on rate limit, timeout, bad key or invalid output |
+| Recommended provider | **Google Gemini** (primary) + **Groq** (automatic fallback) |
+| Recommended model | **`gemini-2.5-flash-lite`** |
+| Input tokens | Measured ~1,000–3,600 per website |
+| Output tokens | Measured ~3,700–4,100 per website |
+| Cost per analysis | **$0 on the free tier**; measured **~$0.002** at paid list price (≈ 500 analyses per $1) |
+| Response time | Measured **14–26 s** end-to-end (3 sites) |
+| Fallback | **Groq `openai/gpt-oss-120b`** – measured 8.5–10.7 s, ~$0.0025; used automatically on error, timeout (60 s), bad key, quota or invalid output |
 
-**Why `gemini-3.5-flash-lite`:** it is the current-generation Flash-Lite model with a free tier, a 1M-token context (large websites are never truncated by the model), native schema-constrained JSON output, and the broad world knowledge needed for competitor suggestions. `gemini-2.5-flash-lite` is cheaper but an older generation, and `gemini-3.8-flash` costs more and doubles in price on 2027-01-01.
+**Why `gemini-2.5-flash-lite`:** in testing it was the only Gemini model that answered reliably. It is the cheapest Gemini model (≈ $0.002 per analysis at paid prices), has a 1M-token context so large websites are never cut off by the model, and returns schema-constrained JSON natively. Its free tier also allows far more than Groq's one analysis per minute, so it suits being the primary model. Newer Gemini 3.x models are not ruled out: switching is one setting (`GEMINI_MODEL`) once their capacity improves.
 
-**Why Groq as fallback:** a different provider means an outage or quota limit at Google does not take the API down. `gpt-oss-120b` supports strict JSON-schema output and is very fast on Groq hardware. Its free tier allows only ~8K tokens per minute, so the Groq request gets a smaller content budget (6,000 chars) and output cap.
+**Why Groq as fallback:** a different provider means an outage or quota limit at Google does not take the API down. `gpt-oss-120b` was the fastest model measured (≈ 9 s) with strict JSON-schema output and good instruction following. Its free tier allows only ~8K tokens per minute, so the Groq request gets a smaller content budget (5,000 chars) and an output cap of 4,400 tokens.
 
-**Balancing accuracy, speed and cost:** use `gemini-3.5-flash-lite` by default; switch `GEMINI_MODEL` to `gemini-3.8-flash` for premium reports where deeper competitor reasoning matters; set `LLM_PRIMARY_PROVIDER=groq` with `openai/gpt-oss-20b` when the lowest latency matters most. All of this is configuration, not code changes.
+**Balancing accuracy, speed and cost:** use `gemini-2.5-flash-lite` by default; set `LLM_PRIMARY_PROVIDER=groq` when the lowest latency matters most (on a paid Groq plan to remove the per-minute limit); try `gemini-3.8-flash` for premium reports once it is not overloaded. All of this is configuration, not code changes.
 
 ### E. Cost optimisation (implemented ✔ / recommended ➜)
 
 * ✔ **Clean before sending** – scripts, styles, SVG, nav, footer and forms removed; only text, headings, meta and structured data are sent.
 * ✔ **De-duplicate** – repeated lines across homepage and sub-pages are removed; sub-pages adding nothing new (SPA shells) are dropped.
-* ✔ **Per-provider character budget** with a fair share for the homepage and each sub-page (14,000 chars for Gemini, 6,000 for Groq).
+* ✔ **Per-provider character budget** with a fair share for the homepage and each sub-page (14,000 chars for Gemini, 5,000 for Groq).
 * ✔ **One LLM call for all five sections** instead of five calls – shared context is paid for once.
 * ✔ **Static prompt first** – the system prompt and schema never change, so providers' implicit prompt caching can apply.
 * ✔ **Result cache** – the same URL within 1 h returns instantly with no LLM call; concurrent identical requests are merged into one call.

@@ -1,0 +1,415 @@
+{
+  "success": true,
+  "website": "https://dxora.com/",
+  "brand": {
+    "name": "Dxora Technologies",
+    "category": "Software Engineering and Digital Transformation Agency",
+    "summary": "Dxora Technologies is a digital transformation agency offering custom software development, enterprise AI/LLM engineering, mobile apps, and cloud solutions. With over 16 years of experience, they focus on delivering scalable and excellent solutions to businesses."
+  },
+  "analysis": {
+    "competitor_analysis": {
+      "brand_overview": "Dxora Technologies offers a comprehensive suite of digital transformation services including custom software, enterprise AI/LLM, mobile apps, cloud solutions, and data analytics, alongside proprietary products in business intelligence, EV charging, AI marketing, and marketplaces.",
+      "main_category": "Digital Transformation and AI Solutions",
+      "main_products_services": [
+        "Custom Software Development",
+        "Enterprise AI & LLM Engineering",
+        "Mobile App Development",
+        "Cloud Architecture & DevOps",
+        "Generative AI Solutions",
+        "Business Intelligence Products"
+      ],
+      "competitors": [
+        {
+          "name": "Infosys",
+          "website": "https://www.infosys.com/",
+          "target_market": "Large enterprises across various industries seeking comprehensive IT services and digital transformation.",
+          "main_service": "IT Consulting and Digital Transformation Services",
+          "strengths": [
+            "Global reach and scale",
+            "Broad range of services",
+            "Established reputation"
+          ],
+          "weaknesses_or_gaps": [
+            "May be less agile for smaller projects",
+            "Potentially higher cost structure"
+          ],
+          "source": "ai_suggestion"
+        },
+        {
+          "name": "Accenture",
+          "website": "https://www.accenture.com/",
+          "target_market": "Global corporations and governments looking for strategy, consulting, digital, technology, and operations services.",
+          "main_service": "Technology and Management Consulting",
+          "strengths": [
+            "Deep industry expertise",
+            "Innovation and R&D focus",
+            "Strong client relationships"
+          ],
+          "weaknesses_or_gaps": [
+            "Can be perceived as very large and bureaucratic",
+            "Focus on large-scale, complex transformations"
+          ],
+          "source": "ai_suggestion"
+        },
+        {
+          "name": "Tata Consultancy Services (TCS)",
+          "website": "https://www.tcs.com/",
+          "target_market": "Enterprises worldwide across BFSI, retail, manufacturing, and other sectors needing IT and digital solutions.",
+          "main_service": "IT Services and Consulting",
+          "strengths": [
+            "Extensive service portfolio",
+            "Strong delivery capabilities",
+            "Large global workforce"
+          ],
+          "weaknesses_or_gaps": [
+            "Innovation pace might lag behind specialized AI firms",
+            "Less emphasis on proprietary product development"
+          ],
+          "source": "ai_suggestion"
+        },
+        {
+          "name": "Wipro",
+          "website": "https://www.wipro.com/",
+          "target_market": "Global enterprises seeking IT, consulting, and business process services, with a growing focus on digital and cloud.",
+          "main_service": "IT, Consulting, and Business Process Services",
+          "strengths": [
+            "Broad service offerings",
+            "Focus on digital transformation",
+            "Global presence"
+          ],
+          "weaknesses_or_gaps": [
+            "Brand perception may not be as strong in niche AI areas",
+            "Competition in specific productized solutions"
+          ],
+          "source": "ai_suggestion"
+        }
+      ],
+      "comparison_table": [
+        {
+          "aspect": "Main Service",
+          "your_brand": "Custom software, enterprise AI/LLM, mobile apps, cloud solutions, and proprietary products.",
+          "competitors": [
+            "IT Consulting and Digital Transformation Services",
+            "Technology and Management Consulting",
+            "IT Services and Consulting",
+            "IT, Consulting, and Business Process Services"
+          ]
+        },
+        {
+          "aspect": "Target Market",
+          "your_brand": "Businesses seeking custom digital solutions, enterprise AI, and cloud infrastructure.",
+          "competitors": [
+            "Large enterprises across various industries",
+            "Global corporations and governments",
+            "Enterprises worldwide",
+            "Global enterprises"
+          ]
+        },
+        {
+          "aspect": "Key Strength",
+          "your_brand": "16+ years of proven excellence, comprehensive service range including proprietary AI products.",
+          "competitors": [
+            "Global reach and scale",
+            "Deep industry expertise",
+            "Extensive service portfolio",
+            "Broad service offerings"
+          ]
+        },
+        {
+          "aspect": "Weakness/Gap",
+          "your_brand": "Less brand recognition compared to global IT giants, potential for slower scaling of proprietary products.",
+          "competitors": [
+            "May be less agile for smaller projects",
+            "Can be perceived as very large and bureaucratic",
+            "Innovation pace might lag behind specialized AI firms",
+            "Brand perception may not be as strong in niche AI areas"
+          ]
+        },
+        {
+          "aspect": "Opportunity",
+          "your_brand": "Leverage AI/LLM expertise and proprietary products to capture market share in specialized digital transformation niches.",
+          "competitors": [
+            "Expand service offerings in emerging tech",
+            "Focus on strategic partnerships",
+            "Develop specialized solutions for specific industries",
+            "Enhance digital transformation capabilities"
+          ]
+        }
+      ],
+      "competitive_advantages": [
+        "Over 16 years of proven delivery excellence.",
+        "Specialization in Enterprise AI & LLM Engineering.",
+        "A portfolio of proprietary 'Dxora Products' for specific business needs.",
+        "Comprehensive digital transformation services from strategy to implementation."
+      ],
+      "market_positioning_opportunities": [
+        "Position as a leader in Generative AI solutions for enterprises.",
+        "Highlight the unique value proposition of proprietary AI-driven products.",
+        "Target mid-market companies seeking specialized digital transformation expertise.",
+        "Expand geographic reach beyond listed areas (IN, US, GB, AE, NZ) based on client demand."
+      ]
+    },
+    "target_search_queries": [
+      {
+        "query": "enterprise AI solutions for business",
+        "platforms": [
+          "Google",
+          "LinkedIn"
+        ],
+        "intent": "Informational and Commercial",
+        "business_relevance": "Attracts businesses actively looking for AI solutions.",
+        "target_audience": "Decision-makers in mid to large enterprises seeking AI integration."
+      },
+      {
+        "query": "custom software development company",
+        "platforms": [
+          "Google",
+          "LinkedIn"
+        ],
+        "intent": "Commercial",
+        "business_relevance": "Captures businesses needing tailored software solutions.",
+        "target_audience": "Business owners and IT managers looking for software partners."
+      },
+      {
+        "query": "digital transformation agency services",
+        "platforms": [
+          "Google",
+          "X"
+        ],
+        "intent": "Commercial",
+        "business_relevance": "Targets companies seeking comprehensive digital strategy and implementation.",
+        "target_audience": "Executives and strategists evaluating digital transformation providers."
+      },
+      {
+        "query": "LLM engineering expertise",
+        "platforms": [
+          "Google",
+          "LinkedIn"
+        ],
+        "intent": "Informational",
+        "business_relevance": "Targets specific technical needs related to Large Language Models.",
+        "target_audience": "Technical leads and CTOs researching LLM capabilities."
+      },
+      {
+        "query": "cloud architecture and devops",
+        "platforms": [
+          "Google",
+          "LinkedIn"
+        ],
+        "intent": "Commercial",
+        "business_relevance": "Attracts businesses looking to optimize their cloud infrastructure.",
+        "target_audience": "IT operations managers and solutions architects."
+      }
+    ],
+    "seo_improvements": {
+      "current_title": "Dxora Technologies – Enterprise AI, Cloud & Digital Transformation",
+      "current_meta_description": "Dxora Technologies delivers custom software, enterprise AI/LLM engineering, mobile apps, and scalable cloud solutions with 16+ years of proven excellence.",
+      "keywords": {
+        "primary_keyword": "digital transformation",
+        "secondary_keywords": [
+          "enterprise AI",
+          "custom software development",
+          "cloud solutions",
+          "LLM engineering",
+          "mobile apps"
+        ],
+        "long_tail_keywords": [
+          "enterprise AI solutions for business",
+          "custom software development company",
+          "scalable cloud infrastructure services",
+          "generative AI solutions provider",
+          "LLM engineering for enterprises"
+        ],
+        "business_keywords": [
+          "software engineering agency",
+          "digital transformation services",
+          "AI development company",
+          "cloud architecture services",
+          "mobile app development"
+        ]
+      },
+      "recommended_title": "Enterprise AI & Digital Transformation Services | Dxora Technologies",
+      "title_structure": "Primary Service Keyword | Benefit/Descriptor | Brand Name",
+      "meta_description": "Dxora Technologies offers expert Enterprise AI, custom software development, mobile apps, and cloud solutions. Leverage 16+ years of proven excellence for your digital transformation needs.",
+      "issues_found": [
+        "The title is slightly long and could be more keyword-focused for search engines.",
+        "The meta description is functional but could be more compelling and include a stronger call to action or benefit.",
+        "While H1 count is 1, the H1 content is very similar to the current title.",
+        "No explicit mention of the primary geographic markets served in the meta description.",
+        "Images on the site (only 1 found) are missing alt text, which impacts accessibility and SEO."
+      ],
+      "supporting_content": [
+        {
+          "type": "service_landing_page",
+          "title": "Generative AI Solutions for Business",
+          "reason": "To attract businesses specifically interested in the latest AI capabilities and capture relevant search traffic."
+        },
+        {
+          "type": "industry_page",
+          "title": "Digital Transformation for Healthcare",
+          "reason": "To target specific industry verticals and showcase tailored solutions, attracting a more qualified audience."
+        },
+        {
+          "type": "blog_topic",
+          "title": "The Future of LLM Engineering in Enterprise",
+          "reason": "To establish thought leadership and attract organic traffic for complex AI-related queries."
+        },
+        {
+          "type": "business_article",
+          "title": "Choosing the Right Custom Software Development Partner",
+          "reason": "To educate potential clients on the value of custom software and position Dxora as the ideal partner."
+        },
+        {
+          "type": "faq",
+          "title": "FAQs about Enterprise AI Implementation",
+          "reason": "To address common customer concerns and queries, improving user experience and SEO for question-based searches."
+        },
+        {
+          "type": "service_landing_page",
+          "title": "Cloud Architecture & DevOps Services",
+          "reason": "To provide detailed information on cloud services and attract businesses looking to optimize their cloud infrastructure and operations."
+        }
+      ]
+    },
+    "top_services": [
+      {
+        "service_name": "Enterprise AI & LLM Engineering",
+        "description": "Developing and implementing advanced artificial intelligence and large language model solutions for businesses.",
+        "target_industry": "All industries",
+        "target_customer": "Mid to large enterprises",
+        "main_benefit": "Enhance business intelligence, automate workflows, and gain competitive advantages through AI.",
+        "source": "website_content"
+      },
+      {
+        "service_name": "Custom Software Development",
+        "description": "Designing and building tailored software applications to meet specific business requirements.",
+        "target_industry": "All industries",
+        "target_customer": "Businesses seeking unique software solutions",
+        "main_benefit": "Improve operational efficiency and achieve business objectives with bespoke software.",
+        "source": "website_content"
+      },
+      {
+        "service_name": "Mobile App Development",
+        "description": "Creating native and cross-platform mobile applications for iOS and Android.",
+        "target_industry": "All industries",
+        "target_customer": "Businesses looking to expand their reach through mobile platforms",
+        "main_benefit": "Engage customers and streamline operations with robust mobile applications.",
+        "source": "website_content"
+      },
+      {
+        "service_name": "Cloud Architecture & DevOps",
+        "description": "Designing, building, and managing scalable and secure cloud infrastructure.",
+        "target_industry": "All industries",
+        "target_customer": "Organizations migrating to or optimizing cloud environments",
+        "main_benefit": "Achieve agility, scalability, and cost-efficiency in cloud operations.",
+        "source": "website_content"
+      },
+      {
+        "service_name": "Generative AI Solutions",
+        "description": "Implementing cutting-edge generative AI technologies for content creation, data synthesis, and innovative applications.",
+        "target_industry": "All industries",
+        "target_customer": "Forward-thinking enterprises exploring AI innovation",
+        "main_benefit": "Unlock new possibilities in content generation, product development, and customer experience.",
+        "source": "website_content"
+      }
+    ],
+    "target_audience": {
+      "primary_audience": [
+        "CTOs",
+        "CIOs",
+        "Heads of IT",
+        "Innovation Leaders"
+      ],
+      "secondary_audience": [
+        "Business Owners",
+        "Product Managers",
+        "Marketing Directors"
+      ],
+      "industries": [
+        "Technology",
+        "Finance",
+        "Healthcare",
+        "E-commerce",
+        "Automotive"
+      ],
+      "business_types": [
+        "Mid-market companies",
+        "Enterprise-level corporations",
+        "Startups requiring advanced tech solutions"
+      ],
+      "customer_profiles": [
+        "Organizations seeking digital transformation.",
+        "Companies aiming to integrate AI and LLMs into their operations.",
+        "Businesses needing custom software or scalable cloud solutions.",
+        "Companies looking to develop advanced mobile applications."
+      ],
+      "geographic_focus": "IN, US, GB, AE, NZ",
+      "customer_needs_and_challenges": [
+        "Need for scalable and efficient digital infrastructure.",
+        "Desire to leverage AI and ML for competitive advantage.",
+        "Challenges in custom software development timelines and costs.",
+        "Requirement for expert guidance in cloud migration and optimization.",
+        "Pressure to innovate and adopt new technologies like Generative AI."
+      ],
+      "customer_interests": [
+        "Digital transformation strategies",
+        "AI and Machine Learning applications",
+        "Cloud computing benefits",
+        "Mobile technology trends",
+        "Business process automation",
+        "Data analytics and business intelligence"
+      ],
+      "recommended_marketing_segments": [
+        {
+          "audience": "Enterprise IT Leaders",
+          "business_type": "Mid to Large Enterprises",
+          "requirement": "Seeking reliable, scalable, and innovative AI and digital transformation solutions."
+        },
+        {
+          "audience": "Business Owners",
+          "business_type": "SMEs and Mid-market Companies",
+          "requirement": "Looking for custom software and practical AI tools to improve efficiency and growth."
+        },
+        {
+          "audience": "Technology Innovators",
+          "business_type": "Forward-thinking companies",
+          "requirement": "Interested in leveraging cutting-edge technologies like LLMs and Generative AI."
+        },
+        {
+          "audience": "Operations Managers",
+          "business_type": "All sizes",
+          "requirement": "Focused on optimizing cloud infrastructure, DevOps practices, and business automation."
+        },
+        {
+          "audience": "Product Development Teams",
+          "business_type": "Tech-focused companies",
+          "requirement": "Needing expertise in mobile app development and complex software engineering."
+        }
+      ]
+    }
+  },
+  "meta": {
+    "provider": "gemini",
+    "model": "gemini-2.5-flash-lite",
+    "pages_analyzed": [
+      "https://dxora.com/",
+      "https://dxora.com/services/generative-ai",
+      "https://dxora.com/services/consulting",
+      "https://dxora.com/services/llm-development"
+    ],
+    "content_chars_sent": 2033,
+    "cached": false,
+    "processing_time_ms": 25778,
+    "token_usage": {
+      "input_tokens": 967,
+      "output_tokens": 3731,
+      "total_tokens": 4698,
+      "estimated_cost_usd": 0.001589
+    },
+    "notes": [
+      "Competitors are AI-generated suggestions based on the website content and the model's general market knowledge. They are not verified by live market research.",
+      "Search queries are AI-generated; no search-volume data is reported.",
+      "Limited static content was available (the site is likely JavaScript-rendered); the analysis is based on the title, meta tags, headings and visible text only."
+    ]
+  }
+}

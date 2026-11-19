@@ -9,6 +9,7 @@
 * Token usage is returned so the API can report the cost of every call.
 """
 
+import asyncio
 import copy
 import logging
 import time
@@ -87,9 +88,10 @@ class LLMProvider(ABC):
 class GeminiProvider(LLMProvider):
     name = "gemini"
 
-    def __init__(self, *args, thinking_budget: int | None = None, **kwargs):
+    def __init__(self, *args, thinking_budget: int | None = None, api_version: str = "v1beta", **kwargs):
         super().__init__(*args, **kwargs)
         self.thinking_budget = thinking_budget
+        self.api_version = api_version
         self._client = None
 
     def _get_client(self):
@@ -99,7 +101,14 @@ class GeminiProvider(LLMProvider):
 
             self._client = genai.Client(
                 api_key=self.api_key,
-                http_options=types.HttpOptions(timeout=int(self.timeout * 1000)),
+                http_options=types.HttpOptions(
+                    timeout=int(self.timeout * 1000),
+                    api_version=self.api_version or None,
+                    # One quick retry for transient overload; quota errors (429) go straight to the fallback.
+                    retry_options=types.HttpRetryOptions(
+                        attempts=2, initial_delay=2.0, max_delay=4.0, http_status_codes=[500, 502, 503, 504]
+                    ),
+                ),
             )
         return self._client
 
@@ -111,6 +120,7 @@ class GeminiProvider(LLMProvider):
             response_mime_type="application/json",
             response_schema=schema,
             max_output_tokens=self.max_output_tokens,
+            automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
         )
         if self.thinking_budget is not None:
             config.thinking_config = types.ThinkingConfig(thinking_budget=self.thinking_budget)
@@ -169,27 +179,37 @@ class GroqProvider(LLMProvider):
         kwargs: dict = {}
         if self.reasoning_effort and "gpt-oss" in self.model:
             kwargs["reasoning_effort"] = self.reasoning_effort
-        try:
-            resp = await self._get_client().chat.completions.create(
-                model=self.model,
-                messages=[{"role": "system", "content": system}, {"role": "user", "content": user}],
-                response_format={
-                    "type": "json_schema",
-                    "json_schema": {"name": schema.__name__, "strict": True, "schema": strict_json_schema(schema)},
-                },
-                max_completion_tokens=self.max_output_tokens,
-                **kwargs,
-            )
-        except groq.AuthenticationError as exc:
-            raise ProviderError("Groq rejected the API key.", fatal=True) from exc
-        except groq.RateLimitError as exc:
-            raise ProviderError("Groq rate limit or free-tier token limit exceeded.") from exc
-        except groq.APITimeoutError as exc:
-            raise ProviderError("Groq request timed out.") from exc
-        except groq.APIStatusError as exc:
-            raise ProviderError(f"Groq request failed (HTTP {exc.status_code}).") from exc
-        except groq.APIError as exc:
-            raise ProviderError(f"Groq API error: {exc.__class__.__name__}.") from exc
+        request = dict(
+            model=self.model,
+            messages=[{"role": "system", "content": system}, {"role": "user", "content": user}],
+            response_format={
+                "type": "json_schema",
+                "json_schema": {"name": schema.__name__, "strict": True, "schema": strict_json_schema(schema)},
+            },
+            max_completion_tokens=self.max_output_tokens,
+            **kwargs,
+        )
+        # Groq occasionally rejects its own generation with HTTP 400 "json_validate_failed"
+        # (documented behaviour of structured outputs); one retry usually succeeds.
+        for attempt in (1, 2):
+            try:
+                resp = await self._get_client().chat.completions.create(**request)
+                break
+            except groq.AuthenticationError as exc:
+                raise ProviderError("Groq rejected the API key.", fatal=True) from exc
+            except groq.RateLimitError as exc:
+                raise ProviderError("Groq rate limit or free-tier token limit exceeded.") from exc
+            except groq.APITimeoutError as exc:
+                raise ProviderError("Groq request timed out.") from exc
+            except groq.APIStatusError as exc:
+                detail = _groq_error_code(exc)
+                if attempt == 1 and exc.status_code == 400 and detail == "json_validate_failed":
+                    logger.info("Groq output failed schema validation; retrying once")
+                    continue
+                logger.warning("Groq HTTP %s: %s", exc.status_code, str(exc)[:300])
+                raise ProviderError(f"Groq request failed (HTTP {exc.status_code}, {detail or 'no detail'}).") from exc
+            except groq.APIError as exc:
+                raise ProviderError(f"Groq API error: {exc.__class__.__name__}.") from exc
 
         choice = resp.choices[0]
         if choice.finish_reason == "length":
@@ -210,7 +230,7 @@ class LLMService:
         available: dict[str, LLMProvider] = {
             "gemini": GeminiProvider(
                 s.gemini_api_key, s.gemini_model, s.gemini_max_content_chars, s.gemini_max_output_tokens,
-                s.llm_timeout_seconds, thinking_budget=s.gemini_thinking_budget,
+                s.llm_timeout_seconds, thinking_budget=s.gemini_thinking_budget, api_version=s.gemini_api_version,
             ),
             "groq": GroqProvider(
                 s.groq_api_key, s.groq_model, s.groq_max_content_chars, s.groq_max_output_tokens,
@@ -249,7 +269,15 @@ class LLMService:
             user = build_user(provider.max_content_chars)
             start = time.perf_counter()
             try:
-                data, in_tok, out_tok, model = await provider.generate(system, user, schema)
+                # Hard deadline: SDK-level timeouts are per network read and can be exceeded.
+                data, in_tok, out_tok, model = await asyncio.wait_for(
+                    provider.generate(system, user, schema), timeout=provider.timeout
+                )
+            except asyncio.TimeoutError:
+                logger.warning("LLM provider %s (%s) timed out after %ss", provider.name, provider.model, provider.timeout)
+                failures.append(f"{provider.name}: timed out after {provider.timeout:.0f}s")
+                all_fatal = False
+                continue
             except ProviderError as exc:
                 logger.warning("LLM provider %s (%s) failed: %s", provider.name, provider.model, exc.message)
                 failures.append(f"{provider.name}: {exc.message}")
@@ -275,6 +303,15 @@ def _validate(schema: type[BaseModel], text: str, provider: str) -> BaseModel:
         return schema.model_validate_json(_strip_fences(text))
     except ValidationError as exc:
         raise ProviderError(f"{provider} returned JSON that does not match the schema ({exc.error_count()} errors).") from exc
+
+
+def _groq_error_code(exc) -> str:
+    body = getattr(exc, "body", None)
+    if isinstance(body, dict):
+        err = body.get("error", body)
+        if isinstance(err, dict):
+            return str(err.get("code") or err.get("type") or "")
+    return ""
 
 
 def _strip_fences(text: str) -> str:

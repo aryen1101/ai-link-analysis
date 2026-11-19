@@ -34,7 +34,19 @@ Rules:
 - top_services: exactly 5. Mark source="website_content" only when the service is explicitly described in the content; otherwise source="inferred".
 - target_audience.recommended_marketing_segments: exactly 5 segments.
 - If something is not stated on the website, say so (e.g. geographic_focus "Not specified on website") instead of inventing facts.
-- Write concise, specific, professional English regardless of the website language."""
+- Write concise, specific, professional English regardless of the website language. Keep each list to 3-6 items and each text field to one or two short sentences."""
+
+
+# Typographic characters LLMs like to emit (non-breaking hyphens/spaces, zero-width chars)
+# that render badly in many clients. Replaced with plain equivalents.
+_TEXT_FIXES = str.maketrans({
+    "‐": "-", "‑": "-", "‒": "-", " ": " ", " ": " ", " ": " ",
+    " ": " ", " ": " ", "​": "", "⁠": "", "﻿": "",
+})
+
+
+def normalize_text(data: LLMAnalysis) -> LLMAnalysis:
+    return LLMAnalysis.model_validate_json(data.model_dump_json().translate(_TEXT_FIXES))
 
 
 class TTLCache:
@@ -111,7 +123,7 @@ class AnalysisService:
             return f"Analyse this website and return the structured analysis.\n\n<website_content>\n{context}\n</website_content>"
 
         result = await self.llm.structured(SYSTEM_PROMPT, build_user, LLMAnalysis)
-        data: LLMAnalysis = result.data  # type: ignore[assignment]
+        data = normalize_text(result.data)  # type: ignore[arg-type]
         context_len = sent_chars.get("n", len(full_context))
 
         data.competitor_analysis = refine_competitors(data.competitor_analysis, data.brand.name, content.final_url)

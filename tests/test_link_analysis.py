@@ -222,7 +222,7 @@ class FakeProvider(LLMProvider):
 
 def FakeLLM(fail=False):
     err = ProviderError("Gemini request timed out.") if fail else None
-    return LLMService(Settings(), providers=[FakeProvider("gemini", "gemini-3.5-flash-lite", err)])
+    return LLMService(Settings(), providers=[FakeProvider("gemini", "gemini-2.5-flash-lite", err)])
 
 
 def make_client(llm=None, extractor=None):
@@ -248,7 +248,7 @@ def test_link_analysis_success_and_cache(public_dns):
                                      "top_services", "target_audience"}
     assert len(body["analysis"]["target_search_queries"]) == 5
     assert all(c["source"] == "ai_suggestion" for c in body["analysis"]["competitor_analysis"]["competitors"])
-    assert body["meta"]["token_usage"]["estimated_cost_usd"] == pytest.approx(0.00745)
+    assert body["meta"]["token_usage"]["estimated_cost_usd"] == pytest.approx((4000 * 0.10 + 2500 * 0.40) / 1e6)
     assert body["meta"]["cached"] is False
 
     r2 = client.post("/link-analysis", json={"url": "acme.example/"})
@@ -294,7 +294,7 @@ def test_health():
 
 def test_health_lists_providers():
     body = make_client().get("/health").json()
-    assert body["llm_providers"] == [{"provider": "gemini", "model": "gemini-3.5-flash-lite"}]
+    assert body["llm_providers"] == [{"provider": "gemini", "model": "gemini-2.5-flash-lite"}]
 
 
 # ----------------------------------------------------------------- provider chain
@@ -344,3 +344,60 @@ def test_strict_schema_for_groq():
 
     check(schema)
     assert schema["$defs"]["Competitor"]["properties"]["source"]["enum"] == ["ai_suggestion"]
+
+
+def test_hung_provider_hits_hard_timeout_and_falls_back():
+    class Hung(FakeProvider):
+        async def generate(self, system, user, schema):
+            await asyncio.sleep(5)
+
+    hung = Hung("gemini", "g")
+    hung.timeout = 0.05
+    llm = LLMService(Settings(), providers=[hung, FakeProvider("groq", "openai/gpt-oss-120b")])
+    result = asyncio.run(llm.structured("s", lambda n: "<website_content>payroll", LLMAnalysis))
+    assert result.provider == "groq"
+
+
+def test_llm_text_is_normalized():
+    from app.services.analysis_service import normalize_text
+
+    data = fake_analysis()
+    data.brand.summary = "New Zealand non‑breaking​ text"
+    assert normalize_text(data).brand.summary == "New Zealand non-breaking text"
+
+
+def test_groq_retries_once_on_json_validate_failed():
+    import groq
+    import httpx
+
+    from app.services.llm_service import GroqProvider
+
+    calls = []
+
+    class Msg:
+        content = fake_analysis().model_dump_json()
+
+    class Choice:
+        finish_reason = "stop"
+        message = Msg()
+
+    class Resp:
+        choices = [Choice()]
+        usage = None
+
+    class Completions:
+        async def create(self, **kw):
+            calls.append(kw)
+            if len(calls) == 1:
+                raise groq.BadRequestError(
+                    "bad", response=httpx.Response(400, request=httpx.Request("POST", "https://x")),
+                    body={"error": {"code": "json_validate_failed"}},
+                )
+            return Resp()
+
+    provider = GroqProvider("k", "openai/gpt-oss-120b", 5000, 100, 10, reasoning_effort="low")
+    provider._client = type("C", (), {"chat": type("Ch", (), {"completions": Completions()})()})()
+    parsed, *_ = asyncio.run(provider.generate("s", "u", LLMAnalysis))
+    assert parsed.brand.name == "Acme" and len(calls) == 2
+    assert calls[0]["reasoning_effort"] == "low"
+    assert calls[0]["response_format"]["json_schema"]["strict"] is True
