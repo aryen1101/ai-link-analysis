@@ -29,23 +29,25 @@ $ curl -X POST localhost:4000/link-analysis -d '{}'
 HTTP 422
 
 # Server log
-INFO:     Started server process [37560]
+INFO:     Started server process [2756]
 INFO:     Waiting for application startup.
-2026-11-18 22:37:19,201 WARNING link-analysis: OPENAI_API_KEY is not set - /link-analysis will return llm_not_configured
-2026-11-18 22:37:19,201 INFO link-analysis: Primary model: gpt-6-luna | fallback: gpt-5.4-mini
+2026-11-19 19:31:26,155 WARNING link-analysis: No GEMINI_API_KEY or GROQ_API_KEY set - /link-analysis will return llm_not_configured
+2026-11-19 19:31:26,155 INFO link-analysis: LLM provider chain: none configured
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://127.0.0.1:4000 (Press CTRL+C to quit)
-INFO:     127.0.0.1:65522 - "GET /health HTTP/1.1" 200 OK
-2026-11-18 22:37:19,640 WARNING link-analysis: blocked_url: Only default web ports (80/443) are allowed.
-INFO:     127.0.0.1:49165 - "POST /link-analysis HTTP/1.1" 400 Bad Request
-2026-11-18 22:37:19,905 WARNING link-analysis: blocked_url: Access to private or internal IP addresses is not allowed.
-INFO:     127.0.0.1:49167 - "POST /link-analysis HTTP/1.1" 400 Bad Request
-2026-11-18 22:37:20,172 WARNING link-analysis: blocked_url: Access to local or internal hostnames is not allowed.
-INFO:     127.0.0.1:49169 - "POST /link-analysis HTTP/1.1" 400 Bad Request
-2026-11-18 22:37:20,446 WARNING link-analysis: invalid_url: Only http and https URLs are supported.
-INFO:     127.0.0.1:49171 - "POST /link-analysis HTTP/1.1" 400 Bad Request
-2026-11-18 22:37:20,716 WARNING link-analysis: invalid_url: URL must not contain whitespace.
-INFO:     127.0.0.1:49175 - "POST /link-analysis HTTP/1.1" 400 Bad Request
-2026-11-18 22:37:21,020 WARNING link-analysis: invalid_url: Domain 'thisdomaindoesnotexist-xyz123.com' could not be resolved.
-INFO:     127.0.0.1:49177 - "POST /link-analysis HTTP/1.1" 400 Bad Request
-INFO:     127.0.0.1:49179 - "POST /link-analysis HTTP/1.1" 422 Unprocessable Content
+INFO:     127.0.0.1:58292 - "GET /health HTTP/1.1" 200 OK
+2026-11-19 19:31:26,771 WARNING link-analysis: llm_not_configured: No LLM API key configured. Set GEMINI_API_KEY and/or GROQ_API_KEY on the server.
+INFO:     127.0.0.1:58619 - "POST /link-analysis HTTP/1.1" 500 Internal Server Error
+2026-11-19 19:31:46,822 WARNING link-analysis: blocked_url: Only default web ports (80/443) are allowed.
+INFO:     127.0.0.1:51630 - "POST /link-analysis HTTP/1.1" 400 Bad Request
+2026-11-19 19:31:47,074 WARNING link-analysis: blocked_url: Access to private or internal IP addresses is not allowed.
+INFO:     127.0.0.1:51632 - "POST /link-analysis HTTP/1.1" 400 Bad Request
+2026-11-19 19:31:47,326 WARNING link-analysis: blocked_url: Access to local or internal hostnames is not allowed.
+INFO:     127.0.0.1:51634 - "POST /link-analysis HTTP/1.1" 400 Bad Request
+2026-11-19 19:31:47,591 WARNING link-analysis: invalid_url: Only http and https URLs are supported.
+INFO:     127.0.0.1:51636 - "POST /link-analysis HTTP/1.1" 400 Bad Request
+2026-11-19 19:31:47,840 WARNING link-analysis: invalid_url: URL must not contain whitespace.
+INFO:     127.0.0.1:51638 - "POST /link-analysis HTTP/1.1" 400 Bad Request
+2026-11-19 19:31:48,267 WARNING link-analysis: invalid_url: Domain 'thisdomaindoesnotexist-xyz123.com' could not be resolved.
+INFO:     127.0.0.1:51640 - "POST /link-analysis HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:51642 - "POST /link-analysis HTTP/1.1" 422 Unprocessable Content

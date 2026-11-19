@@ -12,7 +12,7 @@ from app.schemas import LLMAnalysis
 from app.services import analysis_service as analysis_module
 from app.services.analysis_service import AnalysisService, TTLCache
 from app.services.competitor_service import refine_competitors
-from app.services.llm_service import LLMResult
+from app.services.llm_service import LLMProvider, LLMService, ProviderError, strict_json_schema
 from app.services.website_extractor import WebsiteContent, WebsiteExtractor, build_llm_context
 from app.utils import validators
 from app.utils.validators import ensure_public_url, normalize_url
@@ -166,7 +166,7 @@ def test_spa_noscript_fallback_is_used_and_duplicate_subpages_skipped():
 
 
 def test_subpage_selection_and_context_budget():
-    settings = Settings(openai_api_key="x", max_extra_pages=2)
+    settings = Settings(max_extra_pages=2)
     ex = WebsiteExtractor(settings)
     page = ex.parse("https://acme.example/", SAMPLE_HTML)
     assert set(ex._pick_subpages(page)) == {"https://acme.example/about", "https://acme.example/services"}
@@ -205,18 +205,24 @@ class FakeExtractor:
         return WebsiteContent(url, url, page, [])
 
 
-class FakeLLM:
-    def __init__(self, fail=False):
-        self.fail = fail
+class FakeProvider(LLMProvider):
+    """Stands in for Gemini / Groq: returns the fake analysis or raises a ProviderError."""
 
-    def ensure_configured(self):
-        pass
+    def __init__(self, name, model, error=None, key="k", max_chars=14_000):
+        super().__init__(key, model, max_chars, 1000, 10)
+        self.name, self.error, self.prompts = name, error, []
 
-    async def structured(self, system, user, schema):
-        if self.fail:
-            raise LLMError("LLM provider timed out.")
+    async def generate(self, system, user, schema):
+        self.prompts.append(user)
+        if self.error:
+            raise self.error
         assert "<website_content>" in user and "payroll" in user
-        return LLMResult(fake_analysis(), "gpt-6-luna", 4000, 0, 2500, 1200)
+        return fake_analysis(), 4000, 2500, self.model
+
+
+def FakeLLM(fail=False):
+    err = ProviderError("Gemini request timed out.") if fail else None
+    return LLMService(Settings(), providers=[FakeProvider("gemini", "gemini-3.5-flash-lite", err)])
 
 
 def make_client(llm=None, extractor=None):
@@ -225,7 +231,7 @@ def make_client(llm=None, extractor=None):
     client = TestClient(app)
     client.__enter__()
     app.state.analysis = AnalysisService(
-        Settings(openai_api_key="x"), extractor=extractor or FakeExtractor(), llm=llm or FakeLLM()
+        Settings(), extractor=extractor or FakeExtractor(), llm=llm or FakeLLM()
     )
     return client
 
@@ -242,7 +248,7 @@ def test_link_analysis_success_and_cache(public_dns):
                                      "top_services", "target_audience"}
     assert len(body["analysis"]["target_search_queries"]) == 5
     assert all(c["source"] == "ai_suggestion" for c in body["analysis"]["competitor_analysis"]["competitors"])
-    assert body["meta"]["token_usage"]["estimated_cost_usd"] == pytest.approx(0.00165)
+    assert body["meta"]["token_usage"]["estimated_cost_usd"] == pytest.approx(0.00745)
     assert body["meta"]["cached"] is False
 
     r2 = client.post("/link-analysis", json={"url": "acme.example/"})
@@ -284,3 +290,57 @@ def test_llm_failure(public_dns):
 def test_health():
     r = make_client().get("/health")
     assert r.status_code == 200 and r.json()["status"] == "ok"
+
+
+def test_health_lists_providers():
+    body = make_client().get("/health").json()
+    assert body["llm_providers"] == [{"provider": "gemini", "model": "gemini-3.5-flash-lite"}]
+
+
+# ----------------------------------------------------------------- provider chain
+def test_falls_back_to_groq_with_smaller_budget():
+    gemini = FakeProvider("gemini", "gemini-3.5-flash-lite", ProviderError("Gemini rate limit."))
+    groq = FakeProvider("groq", "openai/gpt-oss-120b", max_chars=6000)
+    llm = LLMService(Settings(), providers=[gemini, groq])
+    result = asyncio.run(llm.structured("sys", lambda n: f"<website_content>payroll {'x' * n}", LLMAnalysis))
+    assert result.provider == "groq" and result.model == "openai/gpt-oss-120b"
+    assert len(gemini.prompts[0]) > len(groq.prompts[0])
+    assert result.estimated_cost_usd == pytest.approx((4000 * 0.15 + 2500 * 0.60) / 1e6)
+
+
+def test_all_providers_fail_reports_each_reason():
+    llm = LLMService(Settings(), providers=[
+        FakeProvider("gemini", "g", ProviderError("Gemini rejected the API key.", fatal=True)),
+        FakeProvider("groq", "q", ProviderError("Groq rate limit.")),
+    ])
+    with pytest.raises(LLMError) as exc:
+        asyncio.run(llm.structured("s", lambda n: "u", LLMAnalysis))
+    assert "gemini: Gemini rejected the API key" in exc.value.message and "groq: Groq rate limit" in exc.value.message
+
+
+def test_providers_without_keys_are_skipped_and_order_is_configurable():
+    s = Settings(gemini_api_key="", groq_api_key="g", llm_primary_provider="groq", llm_fallback_provider="gemini")
+    llm = LLMService(s)
+    assert [p.name for p in llm.providers] == ["groq", "gemini"]
+    assert [p.name for p in llm.active_providers] == ["groq"]
+    with pytest.raises(Exception):
+        LLMService(Settings(gemini_api_key="", groq_api_key="")).ensure_configured()
+
+
+def test_strict_schema_for_groq():
+    schema = strict_json_schema(LLMAnalysis)
+
+    def check(node):
+        if isinstance(node, dict):
+            assert "const" not in node and "default" not in node
+            if node.get("type") == "object" and "properties" in node:
+                assert node["additionalProperties"] is False
+                assert set(node["required"]) == set(node["properties"])
+            for v in node.values():
+                check(v)
+        elif isinstance(node, list):
+            for v in node:
+                check(v)
+
+    check(schema)
+    assert schema["$defs"]["Competitor"]["properties"]["source"]["enum"] == ["ai_suggestion"]

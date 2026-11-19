@@ -1,6 +1,6 @@
 """Pydantic models for the API request/response and the LLM structured output.
 
-The ``LLMAnalysis`` model is passed to OpenAI Structured Outputs, so every field
+The ``LLMAnalysis`` model is used as the response schema for Gemini and Groq structured output, so every field
 is required and only JSON-schema-friendly types are used (no dicts / defaults).
 """
 
@@ -155,6 +155,7 @@ class TokenUsage(BaseModel):
 
 
 class AnalysisMeta(BaseModel):
+    provider: str
     model: str
     pages_analyzed: list[str]
     content_chars_sent: int

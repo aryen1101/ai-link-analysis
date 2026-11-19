@@ -23,10 +23,11 @@ logger = logging.getLogger("link-analysis")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    app.state.analysis = AnalysisService(settings)
-    if not settings.openai_api_key:
-        logger.warning("OPENAI_API_KEY is not set - /link-analysis will return llm_not_configured")
-    logger.info("Primary model: %s | fallback: %s", settings.openai_model, settings.openai_fallback_model)
+    service = AnalysisService(settings)
+    app.state.analysis = service
+    if not service.llm.active_providers:
+        logger.warning("No GEMINI_API_KEY or GROQ_API_KEY set - /link-analysis will return llm_not_configured")
+    logger.info("LLM provider chain: %s", service.llm.describe())
     yield
 
 
@@ -72,8 +73,13 @@ async def root():
 
 
 @app.get("/health", tags=["system"])
-async def health():
-    return {"status": "ok", "model": settings.openai_model, "llm_configured": bool(settings.openai_api_key)}
+async def health(request: Request):
+    providers = request.app.state.analysis.llm.active_providers
+    return {
+        "status": "ok",
+        "llm_configured": bool(providers),
+        "llm_providers": [{"provider": p.name, "model": p.model} for p in providers],
+    }
 
 
 @app.post(

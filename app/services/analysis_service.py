@@ -19,6 +19,7 @@ from app.services.website_extractor import LOW_CONTENT_CHARS, WebsiteExtractor, 
 from app.utils.validators import ensure_public_url
 
 logger = logging.getLogger(__name__)
+MAX_CONTEXT_CHARS = 14_000  # upper bound used for logging / low-content detection
 
 SYSTEM_PROMPT = """You are a senior digital-marketing strategist and SEO analyst.
 You receive content extracted from ONE website and must produce a structured business analysis.
@@ -98,12 +99,20 @@ class AnalysisService:
         started = time.perf_counter()
         self.llm.ensure_configured()  # fail fast before fetching the website
         content = await self.extractor.extract(url)
-        context = build_llm_context(content, self.settings.max_content_chars)
-        logger.info("Extracted %d chars from %d page(s) for %s", len(context), len(content.pages), url)
+        full_context = build_llm_context(content, MAX_CONTEXT_CHARS)
+        logger.info("Extracted %d chars from %d page(s) for %s", len(full_context), len(content.pages), url)
 
-        user_prompt = f"Analyse this website and return the structured analysis.\n\n<website_content>\n{context}\n</website_content>"
-        result = await self.llm.structured(SYSTEM_PROMPT, user_prompt, LLMAnalysis)
+        sent_chars: dict[str, int] = {}
+
+        def build_user(max_chars: int) -> str:
+            # Each provider gets the website content trimmed to its own budget.
+            context = build_llm_context(content, max_chars)
+            sent_chars["n"] = len(context)
+            return f"Analyse this website and return the structured analysis.\n\n<website_content>\n{context}\n</website_content>"
+
+        result = await self.llm.structured(SYSTEM_PROMPT, build_user, LLMAnalysis)
         data: LLMAnalysis = result.data  # type: ignore[assignment]
+        context_len = sent_chars.get("n", len(full_context))
 
         data.competitor_analysis = refine_competitors(data.competitor_analysis, data.brand.name, content.final_url)
 
@@ -111,7 +120,7 @@ class AnalysisService:
         inferred = sum(1 for s in data.top_services if s.source == "inferred")
         if inferred:
             notes.append(f"{inferred} of {len(data.top_services)} services are inferred (not explicitly on the website).")
-        if len(context) < LOW_CONTENT_CHARS:
+        if len(full_context) < LOW_CONTENT_CHARS:
             notes.append(
                 "Limited static content was available (the site is likely JavaScript-rendered); "
                 "the analysis is based on the title, meta tags, headings and visible text only."
@@ -130,9 +139,10 @@ class AnalysisService:
                 target_audience=data.target_audience,
             ),
             meta=AnalysisMeta(
+                provider=result.provider,
                 model=result.model,
                 pages_analyzed=content.pages,
-                content_chars_sent=len(context),
+                content_chars_sent=context_len,
                 cached=False,
                 processing_time_ms=int((time.perf_counter() - started) * 1000),
                 token_usage=TokenUsage(
