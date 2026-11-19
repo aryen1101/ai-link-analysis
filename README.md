@@ -37,6 +37,7 @@ pytest -q
 | Variable | Default | Purpose |
 |---|---|---|
 | `OPENAI_API_KEY` | – | **Required.** Never committed (`.env` is git-ignored) |
+| `OPENAI_BASE_URL` | _(blank)_ | Optional OpenAI-compatible gateway/proxy URL; blank = `api.openai.com` |
 | `OPENAI_MODEL` | `gpt-6-luna` | Primary model |
 | `OPENAI_FALLBACK_MODEL` | `gpt-5.4-mini` | Used automatically if the primary fails (rate limit, timeout, invalid output, model unavailable) |
 | `OPENAI_REASONING_EFFORT` | `low` | Reasoning effort for reasoning models (`none` = fastest) |

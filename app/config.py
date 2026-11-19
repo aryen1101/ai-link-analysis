@@ -11,6 +11,8 @@ class Settings(BaseSettings):
 
     # --- LLM ---
     openai_api_key: str = Field(default="", description="OpenAI API key (never commit this)")
+    # Optional: OpenAI-compatible endpoint (proxy / gateway). Blank = official api.openai.com.
+    openai_base_url: str = ""
     openai_model: str = "gpt-6-luna"
     openai_fallback_model: str = "gpt-5.4-mini"
     llm_timeout_seconds: float = 90.0

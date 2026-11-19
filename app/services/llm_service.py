@@ -63,6 +63,7 @@ class LLMService:
         if self._client is None:
             self._client = AsyncOpenAI(
                 api_key=self.settings.openai_api_key,
+                base_url=self.settings.openai_base_url or None,
                 timeout=self.settings.llm_timeout_seconds,
                 max_retries=1,
             )
