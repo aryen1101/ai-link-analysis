@@ -1,6 +1,10 @@
 # AI-Powered Website Link Analysis API
 
-A FastAPI service that takes a website URL, safely fetches and cleans its content, and uses an LLM (**Google Gemini**, with automatic fallback to **Groq**) to return a structured JSON analysis in five sections:
+A FastAPI service that takes a website URL, safely fetches and cleans its content, and uses an LLM (**Google Gemini**, with automatic fallback to **Groq**) to return a structured JSON analysis in five sections.
+
+**Live demo:** https://ai-link-analysis-nv5l.onrender.com · **API docs (Swagger):** [https://ai-link-analysis-nv5l.onrender.com/docs](https://ai-link-analysis-nv5l.onrender.com/docs) · **Endpoint:** `POST https://ai-link-analysis-nv5l.onrender.com/link-analysis`
+
+The five sections:
 
 1. **Competitor vs Your Brand** – brand overview, category, products/services, 3+ competitors, strengths, gaps, comparison table, advantages, positioning opportunities
 2. **Top 5 Target Search Queries** – query, platforms (Google / Facebook / Instagram / LinkedIn / X), intent, business relevance, audience
@@ -281,13 +285,27 @@ The repo includes a `Procfile` for platforms that use one (Railway, Heroku, etc.
 
 * Build command: `pip install -r requirements.txt`
 * Start command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-* Environment variables: `GEMINI_API_KEY`, `GROQ_API_KEY`
+* Environment variables: `GEMINI_API_KEY`, `GROQ_API_KEY`, `PYTHON_VERSION=3.13.3`
+* Health check path: `/health`
 
 | | URL |
 |---|---|
-| Live demo | _to be added_ |
-| API endpoint | _to be added_ `/link-analysis` |
-| API docs | _to be added_ `/docs` |
+| Live demo | https://ai-link-analysis-nv5l.onrender.com |
+| API endpoint | `POST https://ai-link-analysis-nv5l.onrender.com/link-analysis` |
+| API docs | https://ai-link-analysis-nv5l.onrender.com/docs |
+| Health check | https://ai-link-analysis-nv5l.onrender.com/health |
+
+Try it:
+
+```bash
+curl -X POST https://ai-link-analysis-nv5l.onrender.com/link-analysis \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://stripe.com"}'
+```
+
+Verified on 2026-11-19: `/health` reports both providers, `/docs` loads, and live analyses of dxora.com (14.6 s) and stripe.com (17.7 s) returned all five sections via Gemini.
+
+> The free Render instance sleeps after 15 minutes without traffic; the first request after that takes ~30–50 s extra while it wakes up. Some websites block requests from cloud/data-centre IPs and will return `website_unreachable` on the hosted demo even though they work locally.
 
 ---
 
