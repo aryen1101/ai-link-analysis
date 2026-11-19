@@ -269,3 +269,7 @@ The repo includes a `Procfile` for platforms that use one (Railway, Heroku, etc.
 * SSRF protection on every outbound request (see above).
 * Response size limit (3 MB), timeouts on fetch and LLM, maximum 5 redirects.
 * Internal errors are logged server-side; clients receive generic messages without stack traces.
+
+
+#   a i - l i n k - a n a l y s i s  
+ 
