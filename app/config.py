@@ -8,11 +8,17 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
-    # --- LLM providers (tried in this order; only providers with a key are used) ---
-    llm_primary_provider: str = "gemini"
-    llm_fallback_provider: str = "groq"
+    # --- LLM providers: tried in this order; providers without an API key are skipped ---
+    llm_providers: str = "openai,gemini,groq"
     # Hard per-provider deadline; after it the next provider is tried.
-    llm_timeout_seconds: float = 60.0
+    llm_timeout_seconds: float = 90.0
+
+    # OpenAI - https://platform.openai.com/api-keys
+    openai_api_key: str = ""
+    openai_model: str = "gpt-6-luna"
+    openai_max_output_tokens: int = 10_000
+    openai_max_content_chars: int = 14_000
+    openai_reasoning_effort: str = "low"
 
     # Google Gemini - https://aistudio.google.com/apikey (free tier available)
     gemini_api_key: str = ""
@@ -32,17 +38,21 @@ class Settings(BaseSettings):
     groq_max_content_chars: int = 5_000
     groq_reasoning_effort: str = "low"
 
-    # --- Web research (Gemini + Google Search grounding) ---
+    # --- Web research (search tools with cited sources) ---
     # Used when the page itself has too little evidence: social profiles behind a login wall,
     # sites that block automated requests, empty JavaScript shells.
     web_research_enabled: bool = True
-    # Tried in order; providers without an API key are skipped.
+    # Tried in order until one gives a reliable answer; providers without an API key are skipped.
+    #   openai = Responses API + web_search tool
     #   groq   = gpt-oss + built-in browser_search tool (free tier ~1K requests/day)
-    #   gemini = Google Search grounding (free tier only ~20 requests/day per model)
-    research_providers: str = "groq,gemini"
+    #   gemini = Google Search grounding (free tier only ~20 requests/day per model). Not in the default
+    #            list: in testing gemini-2.5-flash-lite confidently matched accounts to same-name brands.
+    research_providers: str = "openai,groq"
+    research_openai_model: str = "gpt-6-luna"
+    research_openai_effort: str = "low"
     research_groq_model: str = "openai/gpt-oss-120b"
     research_gemini_model: str = "gemini-2.5-flash-lite"
-    research_timeout_seconds: float = 30.0
+    research_timeout_seconds: float = 45.0
     # Fetch and analyse the brand's official website when research names one.
     follow_official_website: bool = True
     # Evidence thresholds (characters of page-specific text, see website_extractor.evidence_chars)

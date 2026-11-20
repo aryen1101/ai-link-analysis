@@ -201,7 +201,7 @@ def test_ttl_cache_expiry(monkeypatch):
 class FakeExtractor:
     calls = 0
 
-    async def extract(self, url):
+    async def extract(self, url, **kw):
         FakeExtractor.calls += 1
         page = WebsiteExtractor.parse(url, SAMPLE_HTML)
         return WebsiteContent(url, url, page, [])
@@ -289,7 +289,7 @@ def test_missing_body_returns_structured_error():
 
 def test_unreachable_website(public_dns):
     class Down:
-        async def extract(self, url):
+        async def extract(self, url, **kw):
             raise WebsiteFetchError("Could not connect to website: ConnectError.")
 
     r = make_client(extractor=Down()).post("/link-analysis", json={"url": "https://down.example"})
@@ -333,12 +333,14 @@ def test_all_providers_fail_reports_each_reason():
 
 
 def test_providers_without_keys_are_skipped_and_order_is_configurable():
-    s = Settings(gemini_api_key="", groq_api_key="g", llm_primary_provider="groq", llm_fallback_provider="gemini")
+    s = Settings(openai_api_key="", gemini_api_key="", groq_api_key="g", llm_providers="groq, gemini ,openai")
     llm = LLMService(s)
-    assert [p.name for p in llm.providers] == ["groq", "gemini"]
+    assert [p.name for p in llm.providers] == ["groq", "gemini", "openai"]
     assert [p.name for p in llm.active_providers] == ["groq"]
+    default = LLMService(Settings(openai_api_key="o", gemini_api_key="g", groq_api_key="q"))
+    assert [p.name for p in default.active_providers] == ["openai", "gemini", "groq"]
     with pytest.raises(Exception):
-        LLMService(Settings(gemini_api_key="", groq_api_key="")).ensure_configured()
+        LLMService(Settings(openai_api_key="", gemini_api_key="", groq_api_key="")).ensure_configured()
 
 
 def test_strict_schema_for_groq():

@@ -23,6 +23,7 @@ from bs4 import BeautifulSoup
 
 from app.config import Settings
 from app.errors import AppError, InsufficientContentError, WebsiteFetchError
+from app.services.platforms import PlatformInfo, detect_platform
 from app.utils.validators import ensure_public_url
 
 logger = logging.getLogger(__name__)
@@ -54,6 +55,7 @@ class PageContent:
     structured_data: list[str] = field(default_factory=list)
     text_blocks: list[str] = field(default_factory=list)
     internal_links: list[tuple[str, str]] = field(default_factory=list)
+    social_links: list[str] = field(default_factory=list)
     image_count: int = 0
     images_missing_alt: int = 0
     has_canonical: bool = False
@@ -162,12 +164,17 @@ class WebsiteExtractor:
         page.image_count = len(imgs)
         page.images_missing_alt = sum(1 for i in imgs if not (i.get("alt") or "").strip())
 
-        # Internal links (before removing nav/footer)
+        # Internal links (before removing nav/footer) + outbound social-profile links (footer icons etc.)
         base_host = urlsplit(url).hostname
         seen = set()
         for a in soup.find_all("a", href=True):
             href = urljoin(url, a["href"]).split("#")[0]
-            if urlsplit(href).hostname != base_host or href in seen or SKIP_LINK_PATTERNS.search(href):
+            host = urlsplit(href).hostname
+            if host != base_host:
+                if host and detect_platform(href) and href not in page.social_links:
+                    page.social_links.append(href)
+                continue
+            if href in seen or SKIP_LINK_PATTERNS.search(href):
                 continue
             seen.add(href)
             page.internal_links.append((href, _clean(a.get_text(" "))[:80]))
@@ -216,12 +223,13 @@ class WebsiteExtractor:
         return page
 
     # ------------------------------------------------------------------ public
-    async def extract(self, url: str) -> WebsiteContent:
+    async def extract(self, url: str, with_subpages: bool = True) -> WebsiteContent:
         async with self._client() as client:
             final_url, html = await self._fetch_html(client, url)
             homepage = self.parse(final_url, html)
 
-            candidates = self._pick_subpages(homepage)
+            # Social platforms: other pages on the same domain belong to the platform, not the account.
+            candidates = [] if (not with_subpages or detect_platform(final_url)) else self._pick_subpages(homepage)
             results = await asyncio.gather(
                 *(self._fetch_html(client, u) for u in candidates), return_exceptions=True
             )
@@ -387,3 +395,20 @@ def evidence_chars(content: "WebsiteContent | None") -> int:
 
 
 __all__ = ["WebsiteExtractor", "WebsiteContent", "PageContent", "build_llm_context", "evidence_chars", "AppError"]
+
+
+def links_to_account(content: "WebsiteContent | None", platform: PlatformInfo) -> str | None:
+    """Return the link on ``content`` that points to this exact social account, if any.
+
+    A brand's own website linking to the account (footer/social icons) is hard evidence that
+    the website and the account belong to the same brand.
+    """
+    if content is None or not platform.handle:
+        return None
+    want = platform.handle.lower()
+    for page in [content.homepage, *content.subpages]:
+        for link in page.social_links:
+            other = detect_platform(link)
+            if other and other.name == platform.name and (other.handle or "").lower() == want:
+                return link.split("?")[0]
+    return None

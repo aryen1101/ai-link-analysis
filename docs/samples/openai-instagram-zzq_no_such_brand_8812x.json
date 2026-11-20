@@ -1,0 +1,24 @@
+{
+  "success": false,
+  "website": "https://www.instagram.com/zzq_no_such_brand_8812x",
+  "error": {
+    "code": "insufficient_public_data",
+    "message": "Instagram does not show this profile's content to anonymous visitors, and public web research found no reliable information about @zzq_no_such_brand_8812x (confidence: none). No analysis was generated to avoid inventing facts. Submit the brand's own website URL for a full analysis."
+  },
+  "details": {
+    "content_quality": "insufficient",
+    "platform": "Instagram",
+    "handle": "zzq_no_such_brand_8812x",
+    "source_type": "social_profile",
+    "page_title": "Instagram",
+    "web_research": {
+      "confidence": "none",
+      "provider": "openai",
+      "website": null,
+      "unconfirmed_candidates": [],
+      "summary": "SUMMARY: I found no public search results for the exact Instagram URL or handle. I couldn’t verify what this account is, what it offers, where it operates, or who its audience is.\nFACTS:\n- No matching public website, brand directory, or company page was found.",
+      "queries": [],
+      "sources": []
+    }
+  }
+}

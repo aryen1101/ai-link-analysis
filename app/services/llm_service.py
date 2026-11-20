@@ -28,6 +28,10 @@ logger = logging.getLogger(__name__)
 #   Gemini: aistudio.google.com/docs/pricing   Groq: console.groq.com/docs/models
 # Both providers also offer a free tier; the figure shows what the call would cost on a paid plan.
 MODEL_PRICING: dict[str, tuple[float, float]] = {
+    # OpenAI: developers.openai.com/api/docs/pricing
+    "gpt-6-luna": (0.10, 0.50),
+    "gpt-5.4-mini": (0.75, 4.50),
+    "gpt-6.1-terra": (1.00, 5.00),
     "gemini-3.5-flash-lite": (0.30, 2.50),
     "gemini-3.1-flash-lite": (0.25, 1.50),
     "gemini-2.5-flash-lite": (0.10, 0.40),
@@ -85,6 +89,62 @@ class LLMProvider(ABC):
 
 
 # --------------------------------------------------------------------- Gemini
+class OpenAIProvider(LLMProvider):
+    """OpenAI Chat Completions with Structured Outputs (strict JSON schema from the Pydantic model)."""
+
+    name = "openai"
+
+    def __init__(self, *args, reasoning_effort: str = "", **kwargs):
+        super().__init__(*args, **kwargs)
+        self.reasoning_effort = reasoning_effort
+        self._client = None
+
+    def _get_client(self):
+        if self._client is None:
+            from openai import AsyncOpenAI
+
+            self._client = AsyncOpenAI(api_key=self.api_key, timeout=self.timeout, max_retries=1)
+        return self._client
+
+    async def generate(self, system, user, schema):
+        import openai
+
+        kwargs: dict = {}
+        if self.reasoning_effort and self.model.startswith(("gpt-5", "gpt-6", "o")):
+            kwargs["reasoning_effort"] = self.reasoning_effort
+        try:
+            completion = await self._get_client().chat.completions.parse(
+                model=self.model,
+                messages=[{"role": "system", "content": system}, {"role": "user", "content": user}],
+                response_format=schema,
+                max_completion_tokens=self.max_output_tokens,
+                prompt_cache_key="link-analysis-v2",
+                **kwargs,
+            )
+        except (openai.AuthenticationError, openai.PermissionDeniedError) as exc:
+            raise ProviderError("OpenAI rejected the API key.", fatal=True) from exc
+        except openai.RateLimitError as exc:
+            raise ProviderError("OpenAI rate limit or quota exceeded.") from exc
+        except openai.APITimeoutError as exc:
+            raise ProviderError("OpenAI request timed out.") from exc
+        except openai.LengthFinishReasonError as exc:
+            raise ProviderError("OpenAI output was truncated (max tokens reached).") from exc
+        except openai.APIStatusError as exc:
+            raise ProviderError(f"OpenAI request failed (HTTP {exc.status_code}).") from exc
+        except openai.APIError as exc:
+            raise ProviderError(f"OpenAI API error: {exc.__class__.__name__}.") from exc
+        except ValidationError as exc:
+            raise ProviderError(f"openai returned JSON that does not match the schema ({exc.error_count()} errors).") from exc
+
+        message = completion.choices[0].message
+        if getattr(message, "refusal", None):
+            raise ProviderError(f"OpenAI refused the request: {message.refusal}")
+        if message.parsed is None:
+            raise ProviderError("OpenAI returned no parsable structured output.")
+        usage = completion.usage
+        return message.parsed, (usage.prompt_tokens if usage else 0), (usage.completion_tokens if usage else 0), self.model
+
+
 class GeminiProvider(LLMProvider):
     name = "gemini"
 
@@ -228,6 +288,10 @@ class LLMService:
     @staticmethod
     def _build_providers(s: Settings) -> list[LLMProvider]:
         available: dict[str, LLMProvider] = {
+            "openai": OpenAIProvider(
+                s.openai_api_key, s.openai_model, s.openai_max_content_chars, s.openai_max_output_tokens,
+                s.llm_timeout_seconds, reasoning_effort=s.openai_reasoning_effort,
+            ),
             "gemini": GeminiProvider(
                 s.gemini_api_key, s.gemini_model, s.gemini_max_content_chars, s.gemini_max_output_tokens,
                 s.llm_timeout_seconds, thinking_budget=s.gemini_thinking_budget, api_version=s.gemini_api_version,
@@ -237,7 +301,7 @@ class LLMService:
                 s.llm_timeout_seconds, reasoning_effort=s.groq_reasoning_effort,
             ),
         }
-        order = [s.llm_primary_provider.lower(), s.llm_fallback_provider.lower()]
+        order = [p.strip().lower() for p in s.llm_providers.split(",") if p.strip()]
         chain = []
         for name in order:
             if name in available and available[name] not in chain:

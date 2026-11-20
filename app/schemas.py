@@ -170,6 +170,9 @@ class AnalysisMeta(BaseModel):
     platform: str | None = None
     handle: str | None = None
     content_quality: Literal["good", "limited", "insufficient"]
+    account_verified_by: str | None = Field(
+        default=None, description="Link on the brand's website pointing to the submitted social account"
+    )
     data_sources: list[str] = Field(description="'website_content' and/or 'web_search'")
     analysis_confidence: Literal["high", "medium", "low"]
     confidence_reason: str

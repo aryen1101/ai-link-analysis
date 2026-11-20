@@ -1,0 +1,472 @@
+{
+  "success": true,
+  "website": "https://www.instagram.com/crestspot",
+  "brand": {
+    "name": "CREST",
+    "category": "AI-powered brand promotion, visibility and advertising platform",
+    "summary": "CREST promotes business visibility across Google, social media and AI tools such as ChatGPT and Gemini. Its website describes plans including Spark, Outreach, Amplify and custom marketing solutions, alongside AI-driven outreach, brand discovery and promotion."
+  },
+  "analysis": {
+    "competitor_analysis": {
+      "brand_overview": "CREST positions its platform around brand discovery and visibility, including an exclusive industry “#1 spot,” AI syndication, outreach and brand-monitoring tools.",
+      "main_category": "Brand visibility and digital marketing platforms",
+      "main_products_services": [
+        "Spark brand profile and basic visibility",
+        "Outreach placement and AI-first brand discovery",
+        "Amplify top-spot placement and AI-powered promotion",
+        "Custom enterprise marketing solutions",
+        "AI agents, competitor watch and brand protection"
+      ],
+      "competitors": [
+        {
+          "name": "Semrush",
+          "website": "https://www.semrush.com/",
+          "target_market": "Businesses, agencies and marketing teams seeking SEO and digital marketing tools",
+          "main_service": "SEO, competitive research and digital marketing software",
+          "strengths": [
+            "Broad SEO and competitive research toolkit",
+            "Established brand and large educational resource library",
+            "Useful for agency and in-house marketing workflows"
+          ],
+          "weaknesses_or_gaps": [
+            "Does not offer CREST’s described exclusive category #1 placement",
+            "Requires users to operate multiple research and marketing features"
+          ],
+          "source": "ai_suggestion"
+        },
+        {
+          "name": "Hootsuite",
+          "website": "https://www.hootsuite.com/",
+          "target_market": "Businesses and social media teams managing multiple accounts",
+          "main_service": "Social media publishing, management and analytics",
+          "strengths": [
+            "Multi-account social media management",
+            "Publishing and monitoring workflows",
+            "Recognised platform for social teams"
+          ],
+          "weaknesses_or_gaps": [
+            "Primarily focused on social media workflows",
+            "Does not specialize in CREST’s industry-specific #1 spot proposition"
+          ],
+          "source": "ai_suggestion"
+        },
+        {
+          "name": "Brand24",
+          "website": "https://brand24.com/",
+          "target_market": "Businesses and marketing teams monitoring online mentions and reputation",
+          "main_service": "Online media monitoring and social listening",
+          "strengths": [
+            "Tracks online mentions and discussion",
+            "Supports brand reputation monitoring",
+            "Provides insights from online conversations"
+          ],
+          "weaknesses_or_gaps": [
+            "Monitoring-led rather than an end-to-end brand-promotion offer",
+            "Does not describe CREST-style exclusive industry placement"
+          ],
+          "source": "ai_suggestion"
+        },
+        {
+          "name": "Mention",
+          "website": "https://mention.com/",
+          "target_market": "Businesses and agencies monitoring brands, competitors and online conversations",
+          "main_service": "Media monitoring and social listening",
+          "strengths": [
+            "Monitors brand and competitor mentions",
+            "Supports social and web listening",
+            "Useful for reputation and campaign tracking"
+          ],
+          "weaknesses_or_gaps": [
+            "Emphasis is on monitoring rather than securing discovery placement",
+            "Does not offer the specific CREST #1 category-spot model"
+          ],
+          "source": "ai_suggestion"
+        },
+        {
+          "name": "SocialPilot",
+          "website": "https://www.socialpilot.co/",
+          "target_market": "Small and mid-sized businesses, agencies and social media professionals",
+          "main_service": "Social media scheduling, publishing and management",
+          "strengths": [
+            "Designed for social media publishing workflows",
+            "Serves agencies and smaller business teams",
+            "Offers tools for managing multiple social accounts"
+          ],
+          "weaknesses_or_gaps": [
+            "More focused on social publishing than cross-channel brand discovery",
+            "Does not describe CREST’s AI syndication and exclusive #1 positioning"
+          ],
+          "source": "ai_suggestion"
+        }
+      ],
+      "comparison_table": [
+        {
+          "aspect": "Main Service",
+          "your_brand": "AI-powered brand promotion, discovery and claimed industry #1 placement across search, social and AI tools",
+          "competitors": [
+            "SEO and digital marketing research software",
+            "Social media management and publishing",
+            "Online media monitoring and social listening",
+            "Media monitoring and social listening",
+            "Social media scheduling and management"
+          ]
+        },
+        {
+          "aspect": "Target Market",
+          "your_brand": "Shops, showrooms, service businesses, franchise brands, agencies, IT companies and enterprise marketers",
+          "competitors": [
+            "Businesses, agencies and marketing teams",
+            "Businesses and social media teams",
+            "Businesses and marketing teams",
+            "Businesses and agencies",
+            "Small and mid-sized businesses and agencies"
+          ]
+        },
+        {
+          "aspect": "Key Strength",
+          "your_brand": "Combines AI syndication, outreach and an exclusive industry #1 positioning proposition",
+          "competitors": [
+            "Broad SEO and competitive research capabilities",
+            "Multi-account social publishing workflows",
+            "Online mention monitoring",
+            "Brand and competitor listening",
+            "Social publishing workflows for businesses and agencies"
+          ]
+        },
+        {
+          "aspect": "Weakness/Gap",
+          "your_brand": "The supplied content does not provide independent performance evidence or explain how category exclusivity and ranking are verified.",
+          "competitors": [
+            "No described exclusive industry #1 placement",
+            "Primarily focused on social media management",
+            "Primarily focused on monitoring",
+            "Primarily focused on monitoring",
+            "Primarily focused on social publishing"
+          ]
+        },
+        {
+          "aspect": "Opportunity",
+          "your_brand": "Publish transparent methodology, measurable case studies and plan-by-plan details to substantiate visibility and #1 claims.",
+          "competitors": [
+            "Differentiate through managed promotion and AI discovery placement",
+            "Differentiate with search, social and AI visibility in one offer",
+            "Connect monitoring insights to active promotion and placement",
+            "Connect listening insights to cross-channel visibility services",
+            "Differentiate beyond scheduling with discovery and brand promotion"
+          ]
+        }
+      ],
+      "competitive_advantages": [
+        "The website brings Google, social media and conversational AI discovery into one brand-promotion proposition.",
+        "Plan descriptions name specific audiences, including shops, showrooms, service businesses, franchise brands, agencies and IT companies.",
+        "Features include AI Brand Agents, Competitor Watch and Brand Protection.",
+        "The site describes the #1 spot as exclusive to one brand per category."
+      ],
+      "market_positioning_opportunities": [
+        "Explain how industry categories, bidding, verification and continued ownership of the #1 spot work.",
+        "Add case studies with clear before-and-after visibility or lead outcomes; the site currently names champion brands but the supplied content gives no quantified results.",
+        "Clarify the differences among Outreach, Amplify and the custom enterprise offer, including the Air plan referenced in web research.",
+        "Create dedicated pages for the stated audiences, such as service businesses, franchise brands and digital agencies."
+      ]
+    },
+    "target_search_queries": [
+      {
+        "query": "AI brand promotion platform for small businesses",
+        "platforms": [
+          "Google"
+        ],
+        "intent": "Find and evaluate a platform that promotes business visibility using AI.",
+        "business_relevance": "Aligns with CREST’s AI-powered brand promotion and discovery positioning.",
+        "target_audience": "Small business owners"
+      },
+      {
+        "query": "CREST brand visibility platform reviews",
+        "platforms": [
+          "Facebook"
+        ],
+        "intent": "Look for brand information, updates or customer discussion.",
+        "business_relevance": "Supports discovery and evaluation of CREST’s visibility offer.",
+        "target_audience": "Business owners considering a promotion platform"
+      },
+      {
+        "query": "AI promotion for local service businesses",
+        "platforms": [
+          "Instagram"
+        ],
+        "intent": "Explore social content and providers promoting services with AI.",
+        "business_relevance": "Matches CREST’s Outreach plan audience of service businesses.",
+        "target_audience": "Service business owners"
+      },
+      {
+        "query": "AI brand marketing platform for digital agencies",
+        "platforms": [
+          "LinkedIn"
+        ],
+        "intent": "Find professional tools or partners for agency brand marketing.",
+        "business_relevance": "Matches the stated Amplify audience of digital agencies and tech service providers.",
+        "target_audience": "Agency owners and marketing leaders"
+      },
+      {
+        "query": "brand visibility across Google social media and ChatGPT",
+        "platforms": [
+          "X"
+        ],
+        "intent": "Discover discussion and solutions for cross-channel and AI discovery.",
+        "business_relevance": "Reflects CREST’s stated coverage across search, social and AI tools.",
+        "target_audience": "Marketing professionals and business founders"
+      }
+    ],
+    "seo_improvements": {
+      "current_title": "CREST - AI Brand Promotion, Visibility & Advertising Platform",
+      "current_meta_description": "Promote your brand on Google, social media, and conversational AI platforms like ChatGPT and Gemini. Boost verified brand visibility with CREST.",
+      "keywords": {
+        "primary_keyword": "AI brand promotion platform",
+        "secondary_keywords": [
+          "brand visibility platform",
+          "AI brand discovery",
+          "business promotion platform",
+          "brand promotion on Google",
+          "AI marketing platform"
+        ],
+        "long_tail_keywords": [
+          "AI brand promotion across Google and social media",
+          "brand visibility platform for service businesses",
+          "AI brand discovery for digital agencies",
+          "promote a business on ChatGPT and Gemini",
+          "brand promotion platform for franchise businesses"
+        ],
+        "business_keywords": [
+          "AI brand promotion",
+          "brand visibility services",
+          "digital brand advertising",
+          "business outreach placement",
+          "AI-powered brand marketing"
+        ]
+      },
+      "recommended_title": "AI Brand Promotion Platform | CREST Visibility",
+      "title_structure": "Primary keyword | differentiating benefit | brand",
+      "meta_description": "Promote your brand across Google, social media and AI tools with CREST. Explore AI discovery, outreach and visibility plans for growing businesses.",
+      "issues_found": [
+        "The page has two H1 headings, including “Powerful And Reliable Brand Awareness” and “Live Showcase”; use one clear primary H1.",
+        "Four of the 40 images are missing alt text.",
+        "The page presents strong #1 and visibility claims, but the supplied content does not show supporting quantified performance evidence.",
+        "The existing title is descriptive but could lead with the clearer target phrase “AI brand promotion platform.”",
+        "Canonical and viewport signals are present in the extracted data."
+      ],
+      "supporting_content": [
+        {
+          "type": "service_landing_page",
+          "title": "AI Brand Promotion Across Google, Social Media and AI Tools",
+          "reason": "Clarify the platform’s stated channels, process and benefits for prospective customers."
+        },
+        {
+          "type": "industry_page",
+          "title": "Brand Visibility for Shops, Showrooms and Service Businesses",
+          "reason": "Address audiences explicitly named for the Outreach plan."
+        },
+        {
+          "type": "industry_page",
+          "title": "AI Brand Promotion for Digital Agencies and IT Companies",
+          "reason": "Speak directly to the audiences identified for Amplify."
+        },
+        {
+          "type": "faq",
+          "title": "How CREST’s Industry #1 Spot, Bidding and Renewals Work",
+          "reason": "Explain the site’s exclusive placement, live bidding and renewal claims."
+        },
+        {
+          "type": "blog_topic",
+          "title": "How Businesses Can Improve Discovery in AI Tools Like ChatGPT and Gemini",
+          "reason": "Build useful content around the AI discovery channels named on the website."
+        },
+        {
+          "type": "business_article",
+          "title": "How to Measure Brand Visibility and Promotion Outcomes",
+          "reason": "Address performance measurement and strengthen the evidence behind visibility claims."
+        }
+      ]
+    },
+    "top_services": [
+      {
+        "service_name": "Spark brand profile",
+        "description": "A no-cost entry plan offering a brand profile, basic visibility and access to explore CREST features.",
+        "target_industry": "Not specified on website",
+        "target_customer": "Brands starting with CREST",
+        "main_benefit": "Establish a basic presence on the platform.",
+        "source": "website_content"
+      },
+      {
+        "service_name": "Outreach placement",
+        "description": "A plan offering dedicated outreach placement, AI-first brand discovery and service showcasing.",
+        "target_industry": "Shops, showrooms, service businesses and franchise brands",
+        "target_customer": "Businesses seeking more visibility and potential customers",
+        "main_benefit": "Reach more potential customers and increase brand awareness.",
+        "source": "website_content"
+      },
+      {
+        "service_name": "Amplify top-spot placement",
+        "description": "A plan featuring premium visibility, #1 Amplify Top Spot Placement, the CREST Engine and 24/7 brand promotion.",
+        "target_industry": "Digital agencies, IT companies and tech service providers",
+        "target_customer": "Businesses seeking prominent brand promotion",
+        "main_benefit": "Increase brand visibility through prominent placement and ongoing promotion.",
+        "source": "website_content"
+      },
+      {
+        "service_name": "Custom enterprise marketing solution",
+        "description": "A tailored offer with a dedicated AI marketing engine, omnichannel campaigns, premium positioning, account management and performance analytics.",
+        "target_industry": "Not specified on website",
+        "target_customer": "Businesses requiring a tailored marketing solution",
+        "main_benefit": "Coordinate enterprise marketing activities with dedicated support and analytics.",
+        "source": "website_content"
+      },
+      {
+        "service_name": "Social collaboration opportunity matching",
+        "description": "CREST says its engine analyzes a social profile and finds brand collaboration opportunities tailored to the audience.",
+        "target_industry": "Not specified on website",
+        "target_customer": "Social media account owners seeking brand collaborations",
+        "main_benefit": "Identify collaboration opportunities suited to a social audience.",
+        "source": "website_content"
+      }
+    ],
+    "target_audience": {
+      "primary_audience": [
+        "Shops, showrooms and service businesses",
+        "Franchise brands",
+        "Digital agencies",
+        "IT companies and tech service providers"
+      ],
+      "secondary_audience": [
+        "Enterprise marketers seeking custom omnichannel campaigns",
+        "Social media account owners seeking brand collaborations"
+      ],
+      "industries": [
+        "Retail and showrooms",
+        "Local and professional services",
+        "Franchising",
+        "Digital marketing and technology"
+      ],
+      "business_types": [
+        "Shops",
+        "Showrooms",
+        "Service businesses",
+        "Franchise brands",
+        "Digital agencies and IT service providers"
+      ],
+      "customer_profiles": [
+        "Businesses seeking greater online visibility",
+        "Brands seeking CREST’s industry #1 placement",
+        "Agencies seeking brand promotion tools",
+        "Enterprise marketers seeking tailored campaigns"
+      ],
+      "geographic_focus": "India is indicated by the company addresses in Ahmedabad and Vadodara in web research; the website content supplied does not state a service-area restriction.",
+      "customer_needs_and_challenges": [
+        "Being discovered across search, social media and AI tools",
+        "Reaching more potential customers",
+        "Building brand trust and visibility",
+        "Monitoring competitors and protecting brand reputation",
+        "Finding relevant brand collaboration opportunities"
+      ],
+      "customer_interests": [
+        "AI-powered marketing and brand discovery",
+        "Social media engagement",
+        "Competitor monitoring",
+        "Brand protection",
+        "Performance analytics"
+      ],
+      "recommended_marketing_segments": [
+        {
+          "audience": "Independent shops and showrooms",
+          "business_type": "Retail businesses",
+          "requirement": "Promote their brand and showcase products or services to more potential customers."
+        },
+        {
+          "audience": "Local service business owners",
+          "business_type": "Service businesses",
+          "requirement": "Improve online discovery and build trust among prospective customers."
+        },
+        {
+          "audience": "Franchise operators",
+          "business_type": "Franchise brands",
+          "requirement": "Increase brand awareness and strengthen visibility in their industry."
+        },
+        {
+          "audience": "Digital agency leaders",
+          "business_type": "Digital marketing agencies",
+          "requirement": "Evaluate AI-powered promotion and premium placement for agency growth."
+        },
+        {
+          "audience": "Enterprise marketing teams",
+          "business_type": "Enterprise businesses",
+          "requirement": "Assess tailored omnichannel campaigns, account management and performance analytics."
+        }
+      ]
+    }
+  },
+  "meta": {
+    "provider": "openai",
+    "model": "gpt-6-luna",
+    "source_type": "social_profile",
+    "platform": "Instagram",
+    "handle": "crestspot",
+    "content_quality": "insufficient",
+    "account_verified_by": "https://www.instagram.com/crestspot",
+    "data_sources": [
+      "official_website",
+      "web_search"
+    ],
+    "analysis_confidence": "high",
+    "confidence_reason": "The official website provides detailed descriptions of CREST’s platform, plans, features and intended business audiences; web research confirms that the website links to the @crestspot Instagram account.",
+    "web_research_sources": [
+      {
+        "title": "Crest Spot",
+        "url": "https://brandfetch.com/crestspot.cloud"
+      },
+      {
+        "title": "CREST #1 (@crestspot) • Threads, Say more",
+        "url": "https://www.threads.com/@crestspot"
+      },
+      {
+        "title": "CREST Kiya kyaa!! - Claim Top Spot | CREST #1",
+        "url": "https://www.linkedin.com/posts/crest-1_crest-crestspot-activity-7503786984642068481-IUOl"
+      },
+      {
+        "title": "CrestSpot - Boldfruit",
+        "url": "https://boldfruit.com/product/crestspot/"
+      },
+      {
+        "title": "Crest Clothing",
+        "url": "https://crestclothing.com/en"
+      },
+      {
+        "title": "CRESTSPOT — Place le blason sur la carte · Ask Điego",
+        "url": "https://play.ask-diego.com/crestspot"
+      },
+      {
+        "title": "crestspot.cloud - viewing lines [0 - 471] of 471",
+        "url": "https://crestspot.cloud"
+      }
+    ],
+    "pages_analyzed": [
+      "https://www.instagram.com/crestspot",
+      "https://crest.dxora.com/"
+    ],
+    "content_chars_sent": 11402,
+    "cached": false,
+    "processing_time_ms": 49874,
+    "token_usage": {
+      "input_tokens": 4828,
+      "output_tokens": 3869,
+      "total_tokens": 8697,
+      "estimated_cost_usd": 0.002417
+    },
+    "notes": [
+      "Competitors are AI-generated suggestions based on the website content and the model's general market knowledge. They are not verified by live market research.",
+      "Search queries are AI-generated; no search-volume data is reported.",
+      "Source is a Instagram profile (@crestspot); the analysis covers the account owner, not Instagram.",
+      "The page exposed only limited public content (0 characters of real text, likely a login wall).",
+      "Supplemented with public web research (7 sources, confidence: high); see meta.web_research_sources.",
+      "The brand's official website (https://crest.dxora.com/), identified by web research, was also analysed.",
+      "Account ownership verified: https://crestspot.cloud/ links to https://www.instagram.com/crestspot."
+    ]
+  }
+}

@@ -16,12 +16,12 @@ INSTAGRAM_LOGIN_WALL = """<html lang="en"><head><title>Instagram</title>
 
 
 class LoginWallExtractor:
-    async def extract(self, url):  # noqa: D102
+    async def extract(self, url, **kw):  # noqa: D102
         return WebsiteContent(url, url, WebsiteExtractor.parse(url, INSTAGRAM_LOGIN_WALL), [])
 
 
 class BlockedExtractor:
-    async def extract(self, url):
+    async def extract(self, url, **kw):
         raise WebsiteFetchError("Website blocked automated access (HTTP 403).")
 
 
@@ -126,7 +126,7 @@ def test_blocked_social_page_without_research_returns_clear_error(public_dns):
 
 def test_good_website_skips_research(public_dns):
     class RichExtractor:
-        async def extract(self, url):
+        async def extract(self, url, **kw):
             html = "<html><head><title>Acme</title></head><body><main>" + "".join(
                 f"<p>Acme payroll feature number {i} helps small businesses pay staff on time every month.</p>"
                 for i in range(40)) + "</main></body></html>"
@@ -167,7 +167,7 @@ def test_official_website_from_research_is_analysed(public_dns):
         def __init__(self):
             self.urls = []
 
-        async def extract(self, url):
+        async def extract(self, url, **kw):
             self.urls.append(url)
             if "instagram.com" in url:
                 return WebsiteContent(url, url, WebsiteExtractor.parse(url, INSTAGRAM_LOGIN_WALL), [])
@@ -189,3 +189,188 @@ def test_official_website_from_research_is_analysed(public_dns):
     prompt = llm.providers[0].prompts[0]
     assert "<official_website_content" in prompt and "brand identity and UI design" in prompt
     assert "<page_content>" not in prompt  # the empty login wall is not sent as evidence
+
+
+# ----------------------------------------------------------------- account verification via the brand's website
+BRAND_SITE = """<html><head><title>CREST - AI Brand Promotion Platform</title>
+<meta name="description" content="CREST helps businesses claim the top spot on Google, social media and AI assistants."></head>
+<body><main>{body}</main><footer>{links}</footer></body></html>"""
+
+
+def brand_site(links: str) -> str:
+    body = "".join(f"<p>CREST plan {i}: AI-powered brand syndication and visibility for small businesses in India.</p>"
+                   for i in range(15))
+    return BRAND_SITE.format(body=body, links=links)
+
+
+class CandidateExtractor:
+    def __init__(self, links):
+        self.links, self.urls = links, []
+
+    async def extract(self, url, **kw):
+        self.urls.append(url)
+        if "instagram.com" in url:
+            return WebsiteContent(url, url, WebsiteExtractor.parse(url, INSTAGRAM_LOGIN_WALL), [])
+        return WebsiteContent(url, url, WebsiteExtractor.parse(url, brand_site(self.links)), [])
+
+
+def unconfirmed_research():
+    return ResearchResult(confidence="low", text="SUMMARY: A same-name brand exists but no source links it to the account.",
+                          candidates=["https://crest.example/"], sources=[ResearchSource("CREST", "https://crest.example/")])
+
+
+def test_links_to_account():
+    from app.services.website_extractor import links_to_account
+
+    page = WebsiteExtractor.parse("https://crest.example/", brand_site(
+        '<a href="https://www.instagram.com/crestspot/">IG</a><a href="https://facebook.com/other">FB</a>'))
+    content = WebsiteContent("u", "u", page, [])
+    assert links_to_account(content, detect_platform("https://instagram.com/CrestSpot")) == "https://www.instagram.com/crestspot/"
+    assert links_to_account(content, detect_platform("https://instagram.com/someoneelse")) is None
+    assert links_to_account(content, detect_platform("https://x.com/crestspot")) is None
+
+
+def test_candidate_website_linking_to_account_is_verified_and_analysed(public_dns):
+    extractor, llm = CandidateExtractor('<a href="https://instagram.com/crestspot">Instagram</a>'), FakeLLM()
+    r = make_client(llm=llm, extractor=extractor, research=FakeResearch(unconfirmed_research())).post(
+        "/link-analysis", json={"url": "https://www.instagram.com/crestspot"})
+    assert r.status_code == 200, r.text
+    meta = r.json()["meta"]
+    assert meta["account_verified_by"] == "https://instagram.com/crestspot"
+    assert meta["data_sources"] == ["official_website", "web_search"]
+    assert any("Account ownership verified" in n for n in meta["notes"])
+    prompt = llm.providers[0].prompts[0]
+    assert "Verified: the website https://crest.example/ links to this exact account" in prompt
+    assert "AI-powered brand syndication" in prompt
+
+
+def test_candidate_website_not_linking_to_account_is_rejected(public_dns):
+    extractor, llm = CandidateExtractor('<a href="https://instagram.com/somebodyelse">Instagram</a>'), FakeLLM()
+    r = make_client(llm=llm, extractor=extractor, research=FakeResearch(unconfirmed_research())).post(
+        "/link-analysis", json={"url": "https://www.instagram.com/crestspot"})
+    assert r.status_code == 422
+    assert r.json()["details"]["web_research"]["unconfirmed_candidates"] == ["https://crest.example/"]
+    # research candidate first, then the obvious domains for the handle - none links to the account
+    assert extractor.urls[:3] == ["https://www.instagram.com/crestspot", "https://crest.example/", "https://crestspot.com/"]
+    assert "https://crestspot.cloud/" in extractor.urls
+    assert llm.providers[0].prompts == []
+
+
+def test_platform_pages_do_not_crawl_platform_subpages(monkeypatch):
+    import asyncio
+
+    from app.config import Settings
+
+    fetched = []
+    html = '<html><head><title>MrBeast - YouTube</title></head><body><a href="/new">New</a><a href="/about">About</a></body></html>'
+
+    async def fake_fetch(self, client, url):
+        fetched.append(url)
+        return url, html
+
+    monkeypatch.setattr(WebsiteExtractor, "_fetch_html", fake_fetch)
+    content = asyncio.run(WebsiteExtractor(Settings()).extract("https://www.youtube.com/@MrBeast"))
+    assert fetched == ["https://www.youtube.com/@MrBeast"] and content.subpages == []
+
+
+def test_platform_redirect_away_from_account_is_not_evidence(public_dns):
+    class RedirectingExtractor:
+        async def extract(self, url, **kw):
+            about = "<html><head><title>About TikTok</title></head><body><main>" + "".join(
+                f"<p>TikTok is the leading destination for short-form mobile video, fact {i}.</p>" for i in range(30)
+            ) + "</main></body></html>"
+            final = "https://www.tiktok.com/in/about"
+            return WebsiteContent(url, final, WebsiteExtractor.parse(final, about), [])
+
+    llm = FakeLLM()
+    r = make_client(llm=llm, extractor=RedirectingExtractor(), research=FakeResearch(reliable_research())).post(
+        "/link-analysis", json={"url": "https://www.tiktok.com/@acmestudio"})
+    assert r.status_code == 200, r.text
+    meta = r.json()["meta"]
+    assert meta["data_sources"] == ["web_search"] and meta["pages_analyzed"] == []
+    assert any("redirected to https://www.tiktok.com/in/about" in n for n in meta["notes"])
+    assert "short-form mobile video" not in llm.providers[0].prompts[0]
+
+
+def test_handle_domain_verified_even_without_research(public_dns):
+    class Extractor:
+        def __init__(self):
+            self.calls = []
+
+        async def extract(self, url, with_subpages=True):
+            self.calls.append((url, with_subpages))
+            if "instagram.com" in url:
+                return WebsiteContent(url, url, WebsiteExtractor.parse(url, INSTAGRAM_LOGIN_WALL), [])
+            if url == "https://crestspot.cloud/":
+                html = brand_site('<a href="https://www.instagram.com/crestspot/">IG</a>')
+                return WebsiteContent(url, url, WebsiteExtractor.parse(url, html), [])
+            raise WebsiteFetchError("Could not connect to website: ConnectError.")
+
+    extractor, llm = Extractor(), FakeLLM()
+    r = make_client(llm=llm, extractor=extractor, research=FakeResearch(None)).post(
+        "/link-analysis", json={"url": "https://www.instagram.com/crestspot"})
+    assert r.status_code == 200, r.text
+    meta = r.json()["meta"]
+    assert meta["account_verified_by"] == "https://www.instagram.com/crestspot/"
+    assert meta["data_sources"] == ["official_website", "web_search"]
+    assert ("https://crestspot.cloud/", False) in extractor.calls   # homepage-only check
+    assert ("https://crestspot.cloud/", True) in extractor.calls    # full read after verification
+    assert "AI-powered brand syndication" in llm.providers[0].prompts[0]
+
+
+def test_handle_domains():
+    from app.services.research_service import handle_domains
+
+    assert handle_domains("Crest_Spot")[:2] == ["https://crestspot.com/", "https://crestspot.cloud/"]
+    assert handle_domains("ab") == [] and handle_domains(None) == []
+
+
+def test_website_matches_handle():
+    from app.services.research_service import website_matches_handle as m
+
+    assert m("https://www.nike.in/", "nike")
+    assert m("https://dxora.com/", "dxora-technologies")
+    assert m("https://crestspot.cloud/", "crestspot")
+    assert not m("https://crestsport.com/", "crestspot")
+    assert m("https://crest.dxora.com/", "crestspot")  # subdomain "crest" names the brand
+    assert not m(None, "nike") and not m("https://nike.com/", None)
+
+
+def test_confident_research_about_a_same_name_brand_is_rejected(public_dns):
+    """Research claims (high confidence) the account belongs to crestsport.com - a different brand that
+    neither links to the account nor matches the handle. It must be discarded; the real brand website
+    is then found because it links to the account."""
+
+    class Extractor:
+        async def extract(self, url, with_subpages=True):
+            if "instagram.com" in url:
+                return WebsiteContent(url, url, WebsiteExtractor.parse(url, INSTAGRAM_LOGIN_WALL), [])
+            if url == "https://crestsport.com/":
+                html = "<html><head><title>CrestSport apparel</title></head><body><main>" + "".join(
+                    f"<p>Cargo shorts and thermal clothing collection number {i} for men.</p>" for i in range(20)
+                ) + '</main><a href="https://instagram.com/crestsport">IG</a></body></html>'
+                return WebsiteContent(url, url, WebsiteExtractor.parse(url, html), [])
+            if url == "https://crestspot.cloud/":
+                html = brand_site('<a href="https://www.instagram.com/crestspot">IG</a>')
+                return WebsiteContent(url, url, WebsiteExtractor.parse(url, html), [])
+            raise WebsiteFetchError("Could not connect to website: ConnectError.")
+
+    wrong = ResearchResult(confidence="high", text="SUMMARY: CrestSport sells cargo shorts.", website="https://crestsport.com/",
+                           sources=[ResearchSource("crestsport.com", "https://crestsport.com/")])
+    llm = FakeLLM()
+    r = make_client(llm=llm, extractor=Extractor(), research=FakeResearch(wrong)).post(
+        "/link-analysis", json={"url": "https://www.instagram.com/crestspot"})
+    assert r.status_code == 200, r.text
+    meta = r.json()["meta"]
+    assert meta["account_verified_by"] == "https://www.instagram.com/crestspot"
+    prompt = llm.providers[0].prompts[0]
+    assert "AI-powered brand syndication" in prompt
+    assert "cargo shorts" not in prompt.lower()
+
+
+def test_notes_wording_for_empty_social_page(public_dns):
+    r = make_client(extractor=LoginWallExtractor(), research=FakeResearch(reliable_research())).post(
+        "/link-analysis", json={"url": "https://www.instagram.com/acmestudio"})
+    notes = r.json()["meta"]["notes"]
+    assert "Source is an Instagram profile (@acmestudio); the analysis covers the account owner, not Instagram." in notes
+    assert "The page showed no public content (login wall for anonymous visitors)." in notes

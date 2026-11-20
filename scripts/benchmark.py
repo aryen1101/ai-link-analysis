@@ -2,7 +2,7 @@
 
 Usage:  python -m scripts.benchmark https://dxora.com https://stripe.com
 Writes each full response to docs/samples/<provider>-<host>.json and prints a Markdown table.
-Requires GEMINI_API_KEY and/or GROQ_API_KEY in .env.
+Requires OPENAI_API_KEY, GEMINI_API_KEY and/or GROQ_API_KEY in .env.
 """
 
 import asyncio
@@ -21,8 +21,8 @@ OUT = Path("docs/samples")
 async def run(urls: list[str]) -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     rows = []
-    for provider in ("gemini", "groq"):
-        settings = Settings(llm_primary_provider=provider, llm_fallback_provider="none")
+    for provider in ("openai", "gemini", "groq"):
+        settings = Settings(llm_providers=provider)
         service = AnalysisService(settings)
         if not service.llm.active_providers:
             print(f"skip {provider}: no API key")

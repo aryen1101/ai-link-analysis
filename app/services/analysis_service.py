@@ -19,8 +19,20 @@ from app.schemas import (
 from app.services.competitor_service import COMPETITOR_DISCLAIMER, refine_competitors
 from app.services.llm_service import LLMService
 from app.services.platforms import PlatformInfo, detect_platform
-from app.services.research_service import ResearchResult, ResearchService
-from app.services.website_extractor import WebsiteContent, WebsiteExtractor, build_llm_context, evidence_chars
+from app.services.research_service import (
+    ResearchResult,
+    ResearchService,
+    ResearchSource,
+    handle_domains,
+    website_matches_handle,
+)
+from app.services.website_extractor import (
+    WebsiteContent,
+    WebsiteExtractor,
+    build_llm_context,
+    evidence_chars,
+    links_to_account,
+)
 from app.utils.text import TEXT_FIXES
 from app.utils.validators import ensure_public_url
 
@@ -60,6 +72,7 @@ def _insufficient_details(
             "confidence": research.confidence,
             "provider": research.provider,
             "website": research.website,
+            "unconfirmed_candidates": research.candidates,
             "summary": research.text[:800],
             "queries": research.queries,
             "sources": [{"title": s.title, "url": s.url} for s in research.sources[:8]],
@@ -164,6 +177,36 @@ class AnalysisService:
         finally:
             self._inflight.pop(key, None)
 
+    async def _read_site(self, url: str, with_subpages: bool = True) -> WebsiteContent | None:
+        """Fetch a related website (official / candidate). Failures are logged, never fatal."""
+        try:
+            return await self.extractor.extract(url, with_subpages=with_subpages)
+        except AppError as exc:
+            logger.info("Related website %s could not be read: %s", url, exc.message)
+            return None
+
+    async def _verify_account_website(
+        self, platform: PlatformInfo, research: ResearchResult | None
+    ) -> tuple[WebsiteContent, str] | None:
+        """Find the brand website that owns a social account.
+
+        Candidates: websites named by research (confirmed or not) and the obvious domains for the
+        handle (crestspot -> crestspot.com / .cloud / ...). Their homepages are fetched in parallel
+        (SSRF-checked) and a candidate is accepted only if it links to this exact account - so an
+        unrelated same-name brand or a parked domain can never be accepted.
+        """
+        candidates = [u for u in ([research.website] if research else []) + (research.candidates if research else []) if u]
+        candidates += handle_domains(platform.handle)
+        candidates = list(dict.fromkeys(candidates))[:12]
+        sites = await asyncio.gather(*(self._read_site(u, with_subpages=False) for u in candidates))
+        for candidate, site in zip(candidates, sites):
+            link = links_to_account(site, platform)
+            if site is not None and link:
+                logger.info("Account %s verified: %s links to %s", platform.label, site.final_url, link)
+                return site, link
+        logger.info("No candidate website links to %s (checked %d)", platform.label, len(candidates))
+        return None
+
     async def _run(self, url: str) -> LinkAnalysisResponse:
         started = time.perf_counter()
         self.llm.ensure_configured()  # fail fast before fetching the website
@@ -177,6 +220,15 @@ class AnalysisService:
         except (WebsiteFetchError, InsufficientContentError) as exc:
             fetch_error = exc
             logger.info("Page fetch for %s gave no usable content: %s", url, exc.message)
+        if content is not None and platform and platform.handle:
+            # Platforms often redirect anonymous visitors (region pages, login, "about" pages).
+            # Such a page describes the platform, not the account, so it is not evidence.
+            landed = detect_platform(content.final_url)
+            if not landed or (landed.handle or "").lower() != platform.handle.lower():
+                fetch_error = WebsiteFetchError(
+                    f"{platform.name} redirected to {content.final_url}, which does not show this account")
+                logger.info("Discarding %s: %s", url, fetch_error.message)
+                content = None
 
         # 2. How much real, page-specific evidence did we get?
         evidence = evidence_chars(content)
@@ -195,20 +247,54 @@ class AnalysisService:
             title = content.homepage.title if content else ""
             desc = content.homepage.meta_description if content else ""
             research = await self.research.lookup(url, platform, title, desc)
+
+        # 3a. Research found a same-name brand but could not confirm it owns this account?
+        #     Check it ourselves: a brand website that links to this exact account is hard evidence.
+        official: WebsiteContent | None = None
+        if platform and platform.handle and research and research.reliable and research.website:
+            # A model's self-rated confidence is not proof. For social accounts the website named by
+            # research must belong to the account: it links back, or its domain matches the handle.
+            if not website_matches_handle(research.website, platform.handle):
+                site = await self._read_site(research.website, with_subpages=False)
+                link = links_to_account(site, platform)
+                if link:
+                    research.verified_by = link
+                else:
+                    logger.info("Research named %s for %s but it neither links to the account nor matches the "
+                                "handle - treating the research as a different brand", research.website, platform.label)
+                    research.confidence = "low"
+                    research.candidates = [research.website, *research.candidates]
+                    research.website = None
+
+        if quality == "insufficient" and platform and platform.handle and not (research and research.reliable):
+            verified = await self._verify_account_website(platform, research)
+            if verified is not None:
+                site, link = verified
+                if research is None:
+                    research = ResearchResult(confidence="medium", text="", provider="link_verification")
+                if research.confidence in ("low", "none"):
+                    # The search findings did not identify this account; do not pass them on as facts.
+                    research.text = ("Search results did not clearly identify this account. The brand was identified "
+                                     "because its official website links to the account.")
+                    research.sources = []
+                    research.confidence = "medium"
+                research.verified_by = link
+                research.website = site.final_url
+                research.sources.append(ResearchSource(
+                    title=f"{site.homepage.title or site.final_url} (links to {link})", url=site.final_url))
+                official = await self._read_site(site.final_url) or site  # full read incl. key sub-pages
         use_research = bool(research and research.reliable)
 
         # 3b. If research names the brand's official website, read it too (same SSRF-safe extractor).
-        official: WebsiteContent | None = None
-        if (use_research and research.website and self.settings.follow_official_website
+        if (official is None and use_research and research.website and self.settings.follow_official_website
                 and not _same_site(research.website, url)):
-            try:
-                official = await self.extractor.extract(research.website)
-            except AppError as exc:
-                logger.info("Official website %s could not be read: %s", research.website, exc.message)
-            if official is not None and evidence_chars(official) < self.settings.min_evidence_chars:
-                official = None
-            if official is not None:
-                logger.info("Using official website %s (%d evidence chars)", official.final_url, evidence_chars(official))
+            official = await self._read_site(research.website)
+            if official is not None and platform and not research.verified_by:
+                research.verified_by = links_to_account(official, platform)
+        if official is not None and evidence_chars(official) < self.settings.min_evidence_chars:
+            official = None
+        if official is not None:
+            logger.info("Using official website %s (%d evidence chars)", official.final_url, evidence_chars(official))
 
         # 4. Refuse to invent an analysis when there is no evidence at all.
         if quality == "insufficient" and not use_research:
@@ -227,7 +313,9 @@ class AnalysisService:
             research_block = ""
             if use_research:
                 src = "\n".join(f"- {s.title}" for s in research.sources[:8])
-                research_block = (f"<web_research confidence=\"{research.confidence}\">\n"
+                verified = (f"Verified: the website {research.website} links to this exact account ({research.verified_by}), "
+                            f"so the account belongs to that brand.\n" if research.verified_by else "")
+                research_block = (f"<web_research confidence=\"{research.confidence}\">\n" + verified
                                   + (f"Official website: {research.website}\n" if research.website else "")
                                   + f"{research.text}\nSources:\n{src}\n</web_research>")
             budget = max(max_chars - len(research_block) - 300, 1000)
@@ -264,18 +352,24 @@ class AnalysisService:
         )
         notes = [COMPETITOR_DISCLAIMER, "Search queries are AI-generated; no search-volume data is reported."]
         if platform:
-            notes.append(f"Source is a {platform.label}; the analysis covers the account owner, not {platform.name}.")
+            article = "an" if platform.label[:1].lower() in "aeiou" else "a"
+            notes.append(f"Source is {article} {platform.label}; the analysis covers the account owner, not {platform.name}.")
         if fetch_error:
             notes.append(f"The page could not be read directly ({fetch_error.message}).")
+        elif evidence == 0:
+            notes.append("The page showed no public content"
+                         f"{' (login wall for anonymous visitors)' if platform else ''}.")
         elif quality != "good":
-            notes.append(f"The page exposed only limited public content ({evidence} characters of real text"
+            notes.append(f"The page showed only limited public content ({evidence} characters of real text"
                          f"{', likely a login wall' if platform else ', likely JavaScript-rendered'}).")
         if use_research:
             notes.append(f"Supplemented with public web research ({len(research.sources)} sources, "
                          f"confidence: {research.confidence}); see meta.web_research_sources.")
         if official is not None:
             notes.append(f"The brand's official website ({official.final_url}), identified by web research, was also analysed.")
-        elif research is not None and quality != "good":
+        if research is not None and research.verified_by:
+            notes.append(f"Account ownership verified: {research.website} links to {research.verified_by}.")
+        if research is not None and not use_research and quality != "good":
             notes.append(f"Web research found no reliable additional information (confidence: {research.confidence}).")
         inferred = sum(1 for s in data.top_services if s.source == "inferred")
         if inferred:
@@ -300,6 +394,7 @@ class AnalysisService:
                 platform=platform.name if platform else None,
                 handle=platform.handle if platform else None,
                 content_quality=quality,
+                account_verified_by=research.verified_by if research is not None else None,
                 data_sources=data_sources,
                 analysis_confidence=data.analysis_confidence,
                 confidence_reason=data.confidence_reason,
